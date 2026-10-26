@@ -1,0 +1,6 @@
+audit_*/
+raw.json
+audit.html
+*.zip
+__pycache__/
+.DS_Store

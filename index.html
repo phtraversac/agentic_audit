@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Internal Linking Audit</title>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.8/highcharts.js" integrity="sha384-XxsZMNol0nU0LnC2cYsyhRNbfyK7CPmF7WrlFvZDdlCKn9hzVkXsHxCHVaKwkl76" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.8/highcharts-more.js" integrity="sha384-E5MZlKp6OsxzcS2elFrYMDs+asezSncszxSlDK49djOdfB3HaepyOAAAIAWdSbFc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.8/modules/accessibility.js" integrity="sha384-RFRqB325VNHIIuDAhM+VeFF+SkZwLBzZioBGl5Eklzl88CWphk90Q7ACAcOt8R8R" crossorigin="anonymous"></script>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#16193a;--muted:#5b6080;--line:#e3e6f0;--accent:#2f6fed;--accent-soft:#e8efff;
+--good:#16a34a;--good-soft:#e7f6ec;--warn:#d97706;--warn-soft:#fdf3e2;--bad:#dc2626;--bad-soft:#fdecec;--navy:#16193a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--navy);color:#fff;padding:28px 16px 22px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header .wrap{position:relative}
+header h1{margin:0 0 6px;font-size:26px;letter-spacing:-.01em;padding-right:110px}
+header p{margin:0;color:#b9bdd9;font-size:14px}
+.lang{position:absolute;top:0;right:16px;display:flex;border:1px solid #3b4170;border-radius:999px;overflow:hidden}
+.lang button{font:inherit;font-size:13px;font-weight:600;background:transparent;color:#b9bdd9;border:0;padding:5px 12px;cursor:pointer}
+.lang button[aria-pressed=true]{background:#fff;color:var(--navy)}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px}
+nav a{white-space:nowrap;color:var(--muted);text-decoration:none;padding:8px 16px;border-radius:999px;font-size:14.5px;font-weight:600;border:1px solid transparent}
+nav a:hover{background:var(--accent-soft);color:var(--accent)}
+nav a.on{background:var(--navy);color:#fff}
+section{padding:34px 0 8px}
+h2{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+h2 small{display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:4px}
+h3{font-size:16px;margin:22px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px}
+.grid{display:grid;gap:16px}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.score{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:start}
+.score .big{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.score .big small{font-size:18px;color:var(--muted);font-weight:500}
+.score .lbl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px}
+.score .yn{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.kpi .v{font-size:30px;font-weight:700;letter-spacing:-.02em}
+.kpi .d{color:var(--muted);font-size:13px}
+.read{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14px;color:#24305e;margin-top:12px}
+.read b{color:var(--ink)}
+.missing{background:var(--warn-soft);border-radius:10px;padding:12px 14px;font-size:14px;color:#7a4a05;margin-top:16px}
+.chart{height:420px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+select,input[type=search]{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+textarea{width:100%;min-height:180px;font:13px/1.4 ui-monospace,Menlo,monospace;border:1px solid var(--line);border-radius:8px;padding:10px}
+label.chk{font-size:14px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer}
+.btn.on,.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:8px 6px;white-space:nowrap;position:sticky;top:0;background:#fff}
+.tbl th[data-k]{cursor:pointer}
+.tbl td{border-bottom:1px solid var(--line);padding:8px 6px;vertical-align:top}
+.tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tbl a{color:var(--accent);text-decoration:none;word-break:break-all}
+.tbl.plain th{position:static}
+.tbl tr.grp td{background:var(--accent-soft);font-weight:600}
+.otile .v,.otile .d{display:block}
+.otile{font:inherit;color:inherit;text-align:left;width:100%;cursor:pointer;margin-top:0}
+.otile.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.scope{display:flex;flex-wrap:wrap;gap:22px;margin:8px 0 6px}
+.scope .v{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.scope .d{font-size:12px;color:var(--muted)}
+.scroll{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.p-high{background:var(--bad-soft);color:var(--bad)}.p-med{background:var(--warn-soft);color:var(--warn)}.p-low{background:#eef0f5;color:var(--muted)}
+.p-ok{background:var(--good-soft);color:var(--good)}.p-acc{background:var(--accent-soft);color:var(--accent)}
+.kw{color:var(--muted);font-size:12.5px}
+.ct td{text-align:right;font-variant-numeric:tabular-nums}
+.ct td:first-child,.ct th:first-child{text-align:left}
+.action{display:grid;grid-template-columns:44px 1fr;gap:14px}
+.action .num{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px}
+.action h3{margin:2px 0 4px}
+.action p{margin:4px 0}
+.action .meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px;font-size:13px;color:var(--muted)}
+.action .meta b{color:var(--ink)}
+code{background:#f0f2f8;border-radius:6px;padding:2px 6px;font-size:12.5px;word-break:break-word}
+ul.rules{margin:8px 0 0;padding-left:20px}ul.rules li{margin:5px 0}
+details summary{cursor:pointer;color:var(--accent);font-weight:600}
+.more{margin-top:10px}
+dfn{font-style:normal;border-bottom:1px dotted var(--accent);cursor:help;position:relative}
+dfn[data-tip]:hover::after,dfn[data-tip]:focus::after{content:attr(data-tip);position:absolute;left:0;top:calc(100% + 4px);z-index:20;width:320px;max-width:80vw;background:var(--navy);color:#fff;font-size:12.5px;line-height:1.4;padding:8px 10px;border-radius:8px;white-space:normal;font-weight:400;text-align:left}
+footer{color:var(--muted);font-size:13px;padding:30px 0 50px}
+@media (max-width:640px){.chart{height:340px}header h1{font-size:22px}.kpi .v{font-size:26px}.score{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1 data-fr="Audit du maillage interne">Internal Linking Audit</h1>
+<p id="sub" data-fr="Construit par votre agent IA à partir du MCP Oncrawl. Rien n'est envoyé : tout se calcule dans ce navigateur.">Built by your AI agent from the Oncrawl MCP. Nothing is sent anywhere: everything is computed in this browser.</p>
+<div class="lang" role="group" aria-label="Language"><button data-lang="en">EN</button><button data-lang="fr">FR</button></div>
+</div></header>
+
+<!-- ===================== LOADER (shown when no data is embedded) ===================== -->
+<main class="wrap" id="loader" hidden>
+<section>
+<h2 data-fr="Charger les données de l'audit<small>Collez le fichier raw.json produit par votre agent (voir AGENT.md), ou choisissez-le sur votre disque.</small>">Load the audit data<small>Paste the raw.json your agent produced (see AGENT.md), or pick it from your disk.</small></h2>
+<div class="card">
+<textarea id="rawtxt" spellcheck="false" placeholder='{"version": 1, "meta": {...}, "rules": [...], "tables": {...}}'></textarea>
+<div class="controls" style="margin-top:10px"><button class="btn primary" id="rawgo" data-fr="Construire l'audit">Build the audit</button><input type="file" id="rawfile" accept=".json,application/json"><span class="kw" id="rawerr"></span></div>
+</div>
+</section>
+</main>
+
+<div id="report" hidden>
+<nav><div class="wrap">
+<a href="#tool" data-fr="1 · Optimisation de l'outil">1 · Tool optimisation</a>
+<a href="#priorities" data-fr="2 · Priorisation du maillage">2 · Internal linking priorities</a>
+<a href="#anchors" data-fr="3 · Implémentation : ancres">3 · Implementation: anchors</a>
+</div></nav>
+
+<main class="wrap">
+<!-- ===================== TAB 1 ===================== -->
+<section id="tool">
+<h2 data-fr="1. La <dfn data-t=segmentation>segmentation</dfn> est-elle optimisée ?<small>Chaque graphique de la Lens est filtré par la segmentation « <b class=segname></b> ». Si des pages n'ont pas de groupe, la Lens sous-estime des parties entières du site.</small>">1. Is the <dfn data-t=segmentation>segmentation</dfn> optimized?<small>Every Lens chart is filtered by the "<b class=segname></b>" segmentation. When pages have no group, the Lens under-counts whole parts of the site.</small></h2>
+<div class="card score" id="segscore"></div>
+<div class="card"><h3 style="margin-top:0" data-fr="Détail du score">Score detail</h3><table class="tbl plain" id="segchecks"></table></div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Comment la segmentation actuelle se répartit dans les groupes de cet audit">How the current segmentation maps to the groups of this audit</h3>
+<div class="scroll" style="max-height:none"><table class="tbl ct" id="ct"></table></div>
+<div class="read" id="ctread"></div>
+</div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Les règles à ajouter ou à corriger">The rules to add or fix</h3>
+<div class="scroll" style="max-height:420px"><table class="tbl" id="segrules"><thead><tr><th data-fr="Groupe concerné">Group concerned</th><th class="n" data-fr="Pages à corriger">Pages to fix</th><th data-fr="Dossier d'URL (groupe actuel)">URL folder (current group)</th><th data-fr="Rôle de ces pages">Role of these pages</th><th data-fr="Règles à ajouter">Rules to add</th></tr></thead><tbody></tbody></table></div>
+<div class="read" id="segleaks"></div>
+</div>
+<div class="grid g2">
+<div class="card"><h3 style="margin-top:0" data-fr="Construisez deux segmentations, pas une">Build two segmentations, not one</h3>
+<ul class="rules" data-fr="<li><b>Gabarit</b> (ce qu'est la page) : accueil, pages piliers et catégories, pages de contenu, pages business, preuves (études de cas), plus taxonomies (tags, auteurs) et pagination. Répond à « ma structure envoie-t-elle la popularité vers le bon gabarit ? »</li><li><b>Thématique</b> (le sujet de la page). Répond à « mes contenus nourrissent-ils la page business correspondante et les autres contenus du même sujet ? »</li><li>Croisez les deux : <b>contenu x une thématique</b> doit pointer vers la page pilier de cette thématique, vers la page business qui y répond et vers les preuves liées.</li>">
+<li><b>Template</b> (what the page is): home, hubs and categories, content pages, money pages, proof (case studies), plus taxonomies (tags, authors) and pagination. Answers "is my structure sending equity to the right template?"</li>
+<li><b>Topic</b> (what the page is about). Answers "do my content pages feed the matching money page and each other?"</li>
+<li>Cross the two: <b>content x a topic</b> should link to that topic's hub, to the money page that answers it and to related proof.</li>
+</ul></div>
+<div class="card"><h3 style="margin-top:0" data-fr="Ce qui fait un bon <dfn data-t=group>groupe de pages</dfn>">What makes a good <dfn data-t=group>page group</dfn></h3>
+<ul class="rules" data-fr="<li><b>Un gabarit, une intention.</b> Mélanger pages de liste et contenus masque le problème.</li><li><b>Exhaustif.</b> Aucune vraie page sans groupe. Pour le vérifier : les pages indexables sans groupe doivent être à 0.</li><li><b>Assez grand</b> (environ 20 pages ou plus) pour que les moyennes aient un sens. Les petits groupes business (tarifs, démo) peuvent rester petits.</li><li><b>Son propre signal de demande</b> (impressions, visites, conversions) pour comparer la demande à la popularité.</li><li><b>Actionnable.</b> Quelqu'un en est responsable et une <dfn data-t=hub>page pilier</dfn> peut pointer vers tout le groupe.</li><li>Des règles sur <b>les dossiers d'URL d'abord</b>, puis sur le title ou le type de schema quand les dossiers trompent. Ordonnez les règles pour que les plus spécifiques (pagination) passent avant les dossiers.</li>">
+<li><b>One template, one intent.</b> Mixing listings and content hides the problem.</li>
+<li><b>Exhaustive.</b> No real page left ungrouped. Test it: ungrouped indexable pages should be 0.</li>
+<li><b>Big enough</b> (about 20 pages or more) so averages mean something. Small money groups (pricing, demo) can stay small.</li>
+<li><b>Its own demand signal</b> (impressions, visits, conversions) so you can compare demand with equity.</li>
+<li><b>Actionable.</b> Someone owns it and one <dfn data-t=hub>hub page</dfn> can link to the whole group.</li>
+<li>Rules on <b>URL folders first</b>, then title or schema type when folders lie. Order the rules so specific ones (pagination) win over folders.</li>
+</ul></div>
+</div>
+
+<h2 style="margin-top:40px" data-fr="2. Le <dfn data-t=zoning>zoning</dfn> est-il optimisé ?<small>Oncrawl lit les balises HTML5 (header, nav, main, aside, footer) pour savoir d'où part chaque lien. Quand un menu est rendu dans la zone principale, il passe pour du contenu et fausse toutes les analyses de liens éditoriaux.</small>">2. Is the <dfn data-t=zoning>zoning</dfn> optimized?<small>Oncrawl reads the HTML5 tags (header, nav, main, aside, footer) to know where each link sits. When a menu is rendered inside the main zone, it passes for content and skews every in-text link analysis.</small></h2>
+<div id="zonmissing"></div>
+<div id="zonbody">
+<div class="card score" id="zonscore"></div>
+<div class="card"><h3 style="margin-top:0" data-fr="Détail du score">Score detail</h3><table class="tbl plain" id="zonchecks"></table></div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Les blocs à déplacer">The blocks to move</h3>
+<div class="scroll" style="max-height:none"><table class="tbl plain" id="zonex"><thead><tr><th data-fr="Bloc">Block</th><th class="n" data-fr="Liens">Links</th><th class="n" data-fr="Pages">Pages</th><th data-fr="Zone aujourd'hui">Zone today</th><th data-fr="Où le mettre">Where to put it</th></tr></thead><tbody></tbody></table></div>
+<div class="read" id="zonread"></div>
+</div>
+</div>
+<div class="card"><details><summary data-fr="Méthode et définitions">Method and definitions</summary><ul class="rules" id="defs" style="margin-top:10px"></ul></details></div>
+</section>
+
+<!-- ===================== TAB 2 ===================== -->
+<section id="priorities" hidden>
+<h2 data-fr="3. Où ajouter des liens internes, par priorité ?<small>Comparez ce que Google demande (impressions de recherche) avec ce que votre maillage donne (<dfn data-t=inrank>Inrank</dfn>). Un groupe qui reçoit bien plus de demande que de popularité interne est sous-alimenté.</small>">3. Where should I add internal links, by priority?<small>Compare what Google wants (search impressions) with what your linking gives (<dfn data-t=inrank>Inrank</dfn>). A group that gets far more demand than internal popularity is starved.</small></h2>
+<div class="card">
+<div id="bubble" class="chart" style="height:460px"></div>
+<div class="read" data-fr="<b>Comment le lire.</b> Les barres bleues mesurent la demande (impressions Google, <dfn data-t=visits>visites SEO</dfn>), l'orange la popularité interne. Quand le bleu est bien plus long que l'orange, le groupe <b>a besoin de plus de liens</b>. Quand l'orange l'emporte, le groupe détient plus de popularité que sa demande : normal pour les pages business (elles convertissent), du gaspillage pour les pages de liste. Survolez une barre pour voir l'Inrank moyen par page, cliquez pour lister ses pages plus bas."><b>How to read it.</b> Blue bars are demand (Google impressions, <dfn data-t=visits>SEO visits</dfn>), orange is internal popularity. When blue is much longer than orange, the group <b>needs more links</b>. When orange wins, the group holds more popularity than its demand: fine for money pages (they convert), wasteful for listings. Hover a bar for the average Inrank per page, click it to list its pages below.</div>
+</div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Dans les pages de contenu : quelles thématiques sont sous-alimentées ?">Inside content pages: which topics are starved?</h3>
+<div id="topics" class="chart" style="height:380px"></div>
+<div class="read" data-fr="Les barres comparent la part des impressions des contenus de chaque thématique avec sa part d'Inrank cumulé. La ligne rouge compte les pages de contenu <dfn data-t=indexable>indexables</dfn> <b>sans aucun <dfn data-t=editorial>lien éditorial</dfn> depuis une autre page</b>. Cliquez sur une thématique pour lister ses pages.">Bars compare each topic's share of content impressions with its share of summed Inrank. The red line counts <dfn data-t=indexable>indexable</dfn> content pages with <b>no <dfn data-t=editorial>in-text link</dfn> from any other page</b>. Click a topic to list its pages.</div>
+</div>
+<div class="card" id="targetsCard">
+<h3 style="margin-top:0" data-fr="Pages à lier, classées par <dfn data-t=prio>priorité</dfn>">Pages to link to, ranked by <dfn data-t=prio>priority</dfn></h3>
+<div class="controls">
+<input type="search" id="tq" placeholder="Search URL or query" data-fr-ph="Rechercher une URL ou une requête">
+<select id="tg"><option value="" data-fr="Tous les groupes">All groups</option></select>
+<select id="tt"><option value="" data-fr="Toutes les thématiques">All topics</option></select>
+<select id="tp"><option value="" data-fr="Toutes les priorités">All priorities</option><option value="High" data-fr="Haute">High</option><option value="Medium" data-fr="Moyenne">Medium</option><option value="Low" data-fr="Basse">Low</option></select>
+<label class="chk"><input type="checkbox" id="tz"> <span data-fr="Sans lien éditorial uniquement">No in-text link only</span></label>
+<span class="kw" id="tcount"></span>
+</div>
+<div class="scroll"><table class="tbl" id="tt_tbl"><thead><tr>
+<th data-k="path" data-fr="Page">Page</th><th data-k="prio" data-fr="Priorité">Priority</th><th data-k="sd" class="n" title="Google impressions where the page ranks between positions 4 and 20" data-fr-title="Impressions Google où la page se classe entre les positions 4 et 20" data-fr="Impressions en pos. 4 à 20">Impressions at pos. 4 to 20</th>
+<th data-k="pos" class="n" data-fr="Position moy.">Avg position</th><th data-k="ed_src" class="n" title="Number of other pages linking to it from their body text" data-fr-title="Nombre d'autres pages qui pointent vers elle depuis leur texte" data-fr="Liens éditoriaux reçus">In-text links received</th>
+<th data-k="inrank" class="n" title="Oncrawl internal popularity, 0 to 10" data-fr-title="Popularité interne Oncrawl, de 0 à 10">Inrank</th>
+<th data-k="gain" class="n" title="Simulated PageRank gain after the proposed links (tab 2, section 6)" data-fr-title="Gain de PageRank simulé après les liens proposés (onglet 2, section 6)" data-fr="Gain simulé">Simulated gain</th>
+<th data-k="depth" class="n" title="Clicks from the home page" data-fr-title="Clics depuis la page d'accueil" data-fr="Profondeur">Depth</th><th data-k="kw_in_anchor" data-fr="Ses requêtes dans les ancres ?">Its queries in anchors?</th><th data-fr="Principales requêtes Google">Top Google queries</th></tr></thead><tbody></tbody></table></div>
+<button class="btn more" id="tmore" data-fr="Afficher 50 de plus">Show 50 more</button>
+<div class="read" id="prioread"></div>
+</div>
+
+<h2 style="margin-top:40px" data-fr="4. Pages orphelines : lesquelles mailler ?<small>Une <dfn data-t=orphan>page orpheline</dfn> est vue par Google mais aucune page crawlée ne pointe vers elle. Quand l'agent a pu vérifier le statut HTTP de chaque URL, le verdict tranche : mailler, rediriger ou ne rien faire.</small>">4. Orphan pages: which ones should get links?<small>An <dfn data-t=orphan>orphan page</dfn> is seen by Google but no crawled page links to it. When your agent could check the HTTP status of every URL, the verdict decides: link, redirect or do nothing.</small></h2>
+<div class="grid g4" id="otiles"></div>
+<p class="kw" style="margin:8px 0 0" data-fr="Cliquez sur une tuile pour filtrer le tableau, cliquez à nouveau pour tout afficher.">Click a tile to filter the table, click it again to show everything.</p>
+<div class="card">
+<div class="controls">
+<input type="search" id="oq" placeholder="Search URL" data-fr-ph="Rechercher une URL">
+<select id="ov"><option value="" data-fr="Tous les verdicts">All verdicts</option></select>
+<select id="og"><option value="" data-fr="Tous les groupes">All groups</option></select>
+<span class="kw" id="ocount"></span>
+</div>
+<div class="scroll"><table class="tbl" id="otbl"><thead><tr><th data-fr="URL orpheline">Orphan URL</th><th data-fr="Verdict">Verdict</th><th data-fr="Statut vérifié">Checked status</th><th class="n" data-fr="Impressions">Impressions</th><th class="n" data-fr="Visites SEO">SEO visits</th><th class="n" data-fr="Hits Googlebot">Googlebot hits</th><th data-fr="Redirige vers">Redirects to</th></tr></thead><tbody></tbody></table></div>
+<button class="btn more" id="omore" data-fr="Afficher 100 de plus">Show 100 more</button>
+<div class="read" id="oread"></div>
+</div>
+
+<h2 style="margin-top:40px" data-fr="5. Les cinq stratégies qui pèsent le plus<small>Classées par impressions en positions 4 à 20 en jeu. Chaque carte donne son périmètre (pages impactées, impressions en jeu) et un filtre à rejouer dans le Data Explorer d'Oncrawl.</small>">5. The five strategies that matter most<small>Ranked by impressions at positions 4 to 20 at stake. Each card gives its scope (pages impacted, impressions at stake) and a filter to replay in the Oncrawl Data Explorer.</small></h2>
+<div id="actions"></div>
+
+<h2 style="margin-top:40px" data-fr="6. Liens à ajouter : qui lie qui, et pour quel gain ?<small>Les liens partent d'une <dfn data-t=hub>page pilier</dfn> ou du texte d'une page de contenu. Le gain est un <dfn data-t=simpr>PageRank simulé</dfn> avant / après ajout des liens proposés.</small>">6. Links to add: who links to whom, and for what gain?<small>Links leave from a <dfn data-t=hub>hub page</dfn> or from the text of a content page. The gain is a <dfn data-t=simpr>simulated PageRank</dfn> before / after adding the proposed links.</small></h2>
+<div id="simmissing"></div>
+<div id="simbody">
+<p id="simintro" style="font-size:16px;margin:10px 0 0"></p>
+<div class="grid g3" id="simtiles"></div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Les liens à ajouter, par action">The links to add, by action</h3>
+<div class="scroll" style="max-height:none"><table class="tbl plain" id="matrix"></table></div>
+<div class="read" id="matread"></div>
+</div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Avant / après : les 20 pages qui gagnent le plus">Before / after: the 20 pages that gain most</h3>
+<div id="simchart" class="chart" style="height:560px"></div>
+<div class="read" id="simread"></div>
+</div>
+</div>
+</section>
+
+<!-- ===================== TAB 3 ===================== -->
+<section id="anchors" hidden>
+<h2 data-fr="7. Ancres : quoi corriger tout de suite ?<small>L'ancre est le texte cliquable. Elle dit à Google de quoi parle la page cible. Deux listes prêtes à exécuter : les <dfn data-t=editorial>liens éditoriaux</dfn> existants à ré-ancrer, et les liens à ajouter avec leur ancre.</small>">7. Anchors: what to fix right now?<small>The anchor is the clickable text. It tells Google what the target page is about. Two ready-to-run lists: the existing <dfn data-t=editorial>in-text links</dfn> to re-anchor, and the links to add with their anchor.</small></h2>
+<div id="ancmissing"></div>
+<div class="grid g4" id="akpis"></div>
+<div class="card" id="fixCard">
+<h3 style="margin-top:0" data-fr="A. Liens existants à ré-ancrer, par priorité">A. Existing links to re-anchor, by priority</h3>
+<div class="controls">
+<input type="search" id="fq" placeholder="Search page or anchor" data-fr-ph="Rechercher une page ou une ancre">
+<select id="fp"><option value="" data-fr="Toutes les priorités">All priorities</option><option value="High" data-fr="Haute">High</option><option value="Medium" data-fr="Moyenne">Medium</option><option value="Low" data-fr="Basse">Low</option></select>
+<select id="fk"><option value="" data-fr="Génériques, URL, vides, copies du title (défaut)">Generic, URL, empty, title copies (default)</option><option value="all" data-fr="Tous les types, descriptives incluses">All types, descriptive included</option><option value="generic" data-fr="Générique">Generic</option><option value="url" data-fr="URL">URL</option><option value="empty" data-fr="Vide">Empty</option><option value="title" data-fr="Copie du title">Title copy</option><option value="descriptive" data-fr="Descriptive sans la requête">Descriptive, no query</option></select>
+<button class="btn" id="fcsv">Export CSV</button>
+<span class="kw" id="fcount"></span>
+</div>
+<div class="scroll"><table class="tbl" id="ftbl"><thead><tr><th data-fr="Priorité">Priority</th><th data-fr="Page qui porte le lien">Page carrying the link</th><th data-fr="Page cible">Target page</th><th data-fr="Ancre actuelle">Current anchor</th><th data-fr="Type">Type</th><th data-fr="Ancre suggérée">Suggested anchor</th><th class="n" title="Impressions at positions 4 to 20 of the target" data-fr-title="Impressions en positions 4 à 20 de la cible" data-fr="Impr. 4 à 20">Impr. 4 to 20</th></tr></thead><tbody></tbody></table></div>
+<button class="btn more" id="fmore" data-fr="Afficher 100 de plus">Show 100 more</button>
+<div class="read" id="fread"></div>
+</div>
+<div class="card" id="propCard">
+<h3 style="margin-top:0" data-fr="B. Liens à ajouter, avec l'ancre à utiliser">B. Links to add, with the anchor to use</h3>
+<div class="controls">
+<input type="search" id="pq" placeholder="Search page" data-fr-ph="Rechercher une page">
+<select id="ps"><option value="" data-fr="Toutes les stratégies">All strategies</option></select>
+<select id="pgs"><option value="" data-fr="Tous les groupes receveurs">All receiver groups</option></select>
+<button class="btn" id="pcsv">Export CSV</button>
+<span class="kw" id="pcount"></span>
+</div>
+<div class="scroll"><table class="tbl" id="ptbl"><thead><tr><th data-fr="Stratégie">Strategy</th><th data-fr="Page qui donne le lien">Page giving the link</th><th data-fr="Où">Where</th><th data-fr="Page qui reçoit">Page receiving</th><th data-fr="Ancre à utiliser">Anchor to use</th><th class="n" data-fr="Gain simulé">Simulated gain</th></tr></thead><tbody></tbody></table></div>
+<button class="btn more" id="pmore" data-fr="Afficher 100 de plus">Show 100 more</button>
+<div class="read" id="pread"></div>
+</div>
+<div class="grid g2">
+<div class="card"><h3 style="margin-top:0" data-fr="Règles d'ancres">Anchor rules</h3>
+<ul class="rules" data-fr="<li><b>Utilisez la requête sur laquelle la page cible se positionne déjà</b>, en langage naturel. La colonne « Ancre suggérée » reprend la première requête Google de chaque page.</li><li><b>Variez.</b> Sur 5 liens, utilisez 2 ou 3 formulations de la même intention (requête exacte, variante longue, forme question). Jamais la même ancre exacte sur tout le site.</li><li><b>Jamais « En savoir plus » ou « ici »</b> dans le texte. Nommez ce que la page cible apporte.</li><li><b>Une cible, une intention.</b> N'utilisez pas la même ancre pour deux pages différentes : cela crée de la cannibalisation.</li><li><b>Liez tôt, en contexte.</b> Un lien dans les premiers paragraphes d'un contenu pertinent vaut mieux qu'un lien dans un bloc de contenus liés.</li><li><b>Les liens image ont besoin d'un texte alt</b>, il sert d'ancre.</li>">
+<li><b>Use the query the target page already ranks for</b>, in natural words. The "Suggested anchor" column takes the first Google query of each page.</li>
+<li><b>Vary it.</b> Across 5 links, use 2 or 3 phrasings of the same intent (exact query, longer variant, question form). Never the same exact anchor sitewide.</li>
+<li><b>Never "Learn more" or "here"</b> in body text. Name what the target page delivers.</li>
+<li><b>One target, one intent.</b> Do not use the same anchor to point at two different pages: it creates cannibalization.</li>
+<li><b>Link early, in context.</b> A link in the first paragraphs of a relevant page beats a link in a related-content block.</li>
+<li><b>Image links need an alt text</b>, it acts as the anchor.</li>
+</ul></div>
+<div class="card">
+<h3 style="margin-top:0" data-fr="Types d'ancres des liens éditoriaux, par groupe cible">In-text anchor types, by target group</h3>
+<div id="akind" class="chart" style="height:340px"></div>
+<div class="read" data-fr="<b>Reprend une requête positionnée</b> = l'ancre contient une requête pour laquelle la cible a déjà des impressions (le mieux). <b>Descriptive</b> = des mots porteurs de sens, mais pas une de ses requêtes. <b>Générique</b> = « Learn more », « En savoir plus », « ici ». <b>URL</b> = une adresse brute. <b>Vide</b> = lien image sans texte."><b>Matches a ranking query</b> = the anchor contains a query the target already gets impressions for (best). <b>Descriptive</b> = meaningful words but not one of its queries. <b>Generic</b> = "Learn more", "Read more", "here". <b>URL</b> = a raw address. <b>Empty</b> = image link without text.</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<footer class="wrap" id="pagefoot"></footer>
+
+<!-- Claude Code: tools/inject.py replaces null below with raw.json (escaped). Hosted page: stays null, the loader opens. -->
+<script id="raw" type="application/json">null</script>
+<script>
+"use strict";
+// =====================================================================================================
+// ENGINE: raw.json (verbatim Oncrawl MCP answers + the confirmed audit rules) -> the audit model.
+// The agent only copies MCP answers; every figure of the report is computed here, the same way for everyone.
+// =====================================================================================================
+const ROLES = ["home", "hub", "content", "money", "proof", "taxonomy", "pagination", "other", "legacy", "ignore"];
+const LISTING_ROLES = new Set(["home", "hub", "taxonomy", "pagination"]);
+const bool = v => v === true || v === "true";
+const num = v => (typeof v === "number" && isFinite(v)) ? v : (v == null || v === "" ? 0 : (isFinite(+v) ? +v : 0));
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const mean = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : 0;
+const sum = a => a.reduce((s, x) => s + x, 0);
+const counter = () => new Map();
+const dict = (entries = []) => Object.assign(Object.create(null), Object.fromEntries(entries));   // keys from the data: no prototype ("constructor", "toString")
+const inc = (m, k, n = 1) => m.set(k, (m.get(k) || 0) + n);
+const topN = (m, n) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
+
+// An MCP aggregate answer {cols, rows} (metric columns nested in one array) or a search answer {urls: [...]} -> list of objects
+function rowsOf(t) {
+  if (!t) return null;
+  if (Array.isArray(t)) return t;
+  if (Array.isArray(t.urls)) return t.urls;
+  if (Array.isArray(t.links)) return t.links;
+  if (!Array.isArray(t.cols) || !Array.isArray(t.rows)) return null;
+  const names = t.cols.flatMap(c => Array.isArray(c) ? c : [c]);
+  return t.rows.map(r => { const v = r.flatMap((x, i) => Array.isArray(t.cols[i]) ? (Array.isArray(x) ? x : [x]) : [x]); const o = {}; names.forEach((c, i) => o[c] = v[i]); return o; });
+}
+const pick = (o, ...keys) => { for (const k of keys) if (o[k] !== undefined) return o[k]; return undefined; };
+const countOf = o => num(pick(o, "link_count", "page_count", "count"));
+const pathOf = url => { try { return new URL(url).pathname || "/"; } catch (e) { return String(url || "/"); } };
+
+function buildModel(R) {
+  const meta = R.meta || {}, T = name => rowsOf(R.tables && R.tables[name]);
+  const SET = {template_min: 50, high_sd: 1000, med_sd: 200, sender_cap: 5};
+  for (const k of Object.keys(SET)) if (R.settings && R.settings[k] !== "" && isFinite(+R.settings[k]) && +R.settings[k] > 0) SET[k] = +R.settings[k];
+  if (!Array.isArray(R.rules) || !R.rules.length) throw new Error("raw.json has no audit rules (rules: [...])");
+  if (!T("pages")) throw new Error('raw.json has no "pages" table');
+  const RULES = R.rules.map(r => { if (!ROLES.includes(r.role)) throw new Error(`rule "${r.name}": unknown role "${r.role}"`); return {...r, re: new RegExp(r.match)}; });
+  const ORDER = [...new Set(RULES.filter(r => r.role !== "ignore").map(r => r.name))];
+  const roleOfGroup = dict(RULES.map(r => [r.name, r.role]).reverse());
+  const ruleOf = path => RULES.find(r => r.re.test(path));
+  const brand = (meta.brand || []).map(b => String(b).toLowerCase()).filter(Boolean);
+  const avail = {links: !!T("links_main"), graph: !!T("graph"), footer: !!T("footer"), positions: !!T("positions"), kw: !!T("kw"), orphan_status: !!(R.orphan_status && Object.keys(R.orphan_status).length)};
+
+  // ---------- per-page tables, joined by url ----------
+  // enum dimensions come back as every combination, empty ones with a count of 0: keep the rows that hold pages
+  const held = o => ["page_count", "count"].every(k => !(k in o) || num(o[k]) > 0);
+  const byUrl = (name, field) => { const m = new Map(); for (const o of T(name) || []) if (o.url != null && o[field] != null && held(o)) { if (!m.has(o.url)) m.set(o.url, o[field]); } return m; };
+  const segField = meta.seg ? "page_group_" + meta.seg : null, tsegField = meta.topic_seg ? "page_group_" + meta.topic_seg : null;
+  const IDX = byUrl("indexable", "indexable"), TTL = byUrl("titles", "title"), SEGM = segField ? byUrl("seg", segField) : new Map();
+  const TSEG = tsegField ? byUrl("topic", tsegField) : new Map(), KWA = byUrl("kw_anchor", "gsc_kw_in_inlinks_anchors");
+  const KW = new Map(); for (const o of T("kw") || []) if (o.url && Array.isArray(o.gsc_kw)) KW.set(o.url, o.gsc_kw);
+  const first = v => Array.isArray(v) ? (v[0] ?? null) : (v || null);
+
+  const P = (T("pages") || []).map(o => ({url: o.url, fetched: bool(o.fetched), status: o["status_code:min"] == null ? null : num(o["status_code:min"]), depth: o["depth:min"] == null ? null : num(o["depth:min"]),
+    inrank: num(o["inrank_decimal:sum"]), inl: num(o["follow_inlinks:sum"]), imp: num(o["gsc_impressions:sum"]), clk: num(o["gsc_clicks:sum"]),
+    pos: o["gsc_position:avg"] == null ? null : num(o["gsc_position:avg"]), sd: num(o["gsc_impressions_pos_4_10:sum"]) + num(o["gsc_impressions_pos_11_13:sum"]) + num(o["gsc_impressions_pos_14_20:sum"]),
+    visits: num(o["seo_visits:sum"]), bot: num(o["googlebot_hits:sum"])}));
+  const topicOf = (rule, path, url) => {
+    if (rule.topic === "seg") return first(TSEG.get(url));
+    if (typeof rule.topic === "number") return path.split("/").filter(Boolean)[rule.topic] || null;
+    return null;
+  };
+  // log artefact seen on some crawls: many pagination URLs with the exact same visit count; zero that value only
+  const pagVisits = counter();
+  for (const p of P) { const r = ruleOf(pathOf(p.url)); if (r && r.role === "pagination" && p.visits) inc(pagVisits, p.visits); }
+  const art = topN(pagVisits, 1)[0], ARTEFACT = art && art[1] >= 10 ? {value: art[0], pages: art[1]} : null;
+  // the rules read the URL path only: keep the hosts of the audited site (meta.hosts, default the host of meta.site)
+  const hostOf = u => { try { return new URL(u).host; } catch (e) { return ""; } };
+  const HOSTS = new Set(meta.hosts && meta.hosts.length ? meta.hosts : meta.site ? [hostOf(meta.site)] : []);
+  const inSite = u => !HOSTS.size || HOSTS.has(hostOf(u));
+  const pages = new Map();
+  for (const p of P) {
+    if (!inSite(p.url)) continue;
+    const path = pathOf(p.url), rule = ruleOf(path);
+    if (ARTEFACT && rule && rule.role === "pagination" && p.visits === ARTEFACT.value) p.visits = 0;
+    const signal = p.imp + p.bot + p.visits;
+    if (!rule || rule.role === "ignore" || (!p.fetched && (!signal || p.url.includes("?")))) continue;   // tracking-param variants are not orphans
+    const live = p.fetched && p.status === 200 && bool(IDX.get(p.url));
+    const role = rule.role, topic = (role === "content" || role === "hub") ? topicOf(rule, path, p.url) : null;
+    pages.set(p.url, {...p, path, group: rule.name, role, old: first(SEGM.get(p.url)) || "(none)", tseg: first(TSEG.get(p.url)), topic,
+      title: TTL.get(p.url) || null, live, orphan: !p.fetched, kw: KW.get(p.url) || [], kw_in_anchor: KWA.has(p.url) ? bool(KWA.get(p.url)) : null,
+      anchors: counter(), ed: 0, ed_srcs: new Set(), lst: 0, template: 0, listing: 0, editorial: 0, tag_byline: 0});
+  }
+  const pg = u => pages.get(u), grp = u => { const r = ruleOf(pathOf(u)); return r ? r.name : null; }, roleOfUrl = u => { const r = ruleOf(pathOf(u)); return r ? r.role : null; };
+  const livePages = [...pages.values()].filter(p => p.live);
+
+  // ---------- main-zone links: template (repeated block), listing, tag/byline, editorial ----------
+  // links with no anchor text (image links) drop out of an origin x target x anchor aggregate: they come in links_main_empty
+  const OTA = [...(T("links_main") || []), ...(T("links_main_empty") || [])].map(o => [o.origin, o.target, o.anchor ?? "", countOf(o)]).filter(r => r[3] && inSite(r[0]));
+  const pairSrc = counter(); for (const [o, t, a] of OTA) inc(pairSrc, t + "\u0000" + a);
+  const links = [];   // [origin_group, origin, target, anchor, n, kind]
+  for (const [o, t, a, n] of OTA) {
+    if (o.split("#")[0] === t.split("#")[0]) continue;
+    const ro = roleOfUrl(o), tp = pg(t);
+    const k = pairSrc.get(t + "\u0000" + a) >= SET.template_min ? "template" : LISTING_ROLES.has(ro) ? "listing" : tp && tp.role === "taxonomy" ? "tag_byline" : "editorial";
+    links.push([grp(o), o, t, a, n, k]);
+    if (tp) { tp[k] += n; if (k === "editorial") { inc(tp.anchors, a, n); tp.ed_srcs.add(o); } }
+  }
+  for (const p of pages.values()) { p.ed = p.editorial; p.ed_src = avail.links ? p.ed_srcs.size : null; p.lst = p.listing; }
+
+  const GENERIC = /^(read more|learn more|more|here|click here|this|this article|this post|this guide|article|en savoir plus|lire la suite|voir plus|lire l'article|ici|cliquez ici|see more|discover( more)?|découvrir|find out more|continue reading|download|télécharger|link|lien|source|website|check it out|view|watch|register|sign up|go|next|previous|suivant|précédent|»|›|→|[^\p{L}\p{N}]*)$/iu;
+  const kind = (a, kws) => { a = (a || "").trim(); if (!a) return "empty"; const al = a.toLowerCase();
+    if (al.startsWith("http") || al.startsWith("www.")) return "url"; if (GENERIC.test(a)) return "generic";
+    if (kws.some(k => k && k.length > 3 && (al.includes(k) || (al.length > 3 && k.includes(al))))) return "query"; return "descriptive"; };
+
+  // ---------- groups ----------
+  const all = [...pages.values()];
+  const totImp = sum(all.map(p => p.imp)) || 1, totInr = sum(livePages.map(p => p.inrank)) || 1, totVis = sum(all.map(p => p.visits)) || 1;
+  const groups = ORDER.map(name => {
+    const ps = all.filter(p => p.group === name), live = ps.filter(p => p.live), kwp = live.filter(p => p.kw.length), ak = {};
+    for (const p of ps) for (const [a, n] of p.anchors) { const k = kind(a, p.kw.map(x => String(x).toLowerCase())); ak[k] = (ak[k] || 0) + n; }
+    const g = {name, role: roleOfGroup[name], pages: ps.length, live: live.length, orphans: ps.filter(p => p.orphan).length, orphan_imp: sum(ps.filter(p => p.orphan).map(p => p.imp)),
+      imp: sum(ps.map(p => p.imp)), clk: sum(ps.map(p => p.clk)), sd: sum(ps.map(p => p.sd)), visits: sum(ps.map(p => p.visits)), bot: sum(ps.map(p => p.bot)), inrank: sum(live.map(p => p.inrank)),
+      avg_inrank: mean(live.map(p => p.inrank)), avg_inl: mean(live.map(p => p.inl)), avg_ed: mean(live.map(p => p.ed)), med_depth: median(live.map(p => p.depth).filter(Boolean)),
+      weak: avail.links ? live.filter(p => p.ed_src === 0).length : null, kw_pages: kwp.length, kw_miss: kwp.filter(p => p.kw_in_anchor === false).length, anchors: ak};
+    g.imp_share = g.imp / totImp * 100; g.inrank_share = g.inrank / totInr * 100; g.visit_share = g.visits / totVis * 100; g.gap = g.imp_share - g.inrank_share;
+    return g;
+  });
+  const roleStats = role => { const gs = groups.filter(g => g.role === role), live = livePages.filter(p => p.role === role), kwp = live.filter(p => p.kw.length);
+    return {names: gs.map(g => g.name), pages: sum(gs.map(g => g.pages)), live: live.length, avg_inrank: mean(live.map(p => p.inrank)), kw_pages: kwp.length, kw_miss: kwp.filter(p => p.kw_in_anchor === false).length}; };
+  const RS = Object.fromEntries(ROLES.map(r => [r, roleStats(r)]));
+
+  const M = {groups, order: ORDER, tot_imp: totImp, roles: RS, avail, settings: SET};
+  const flowMain = counter();
+  for (const [go, o, t, a, n, k] of links) if (k === "editorial" && pg(t)) inc(flowMain, go + "\u0000" + pg(t).group, n);
+  const flow = (fromRole, toRole) => sum([...flowMain.entries()].filter(([k]) => { const [a, b] = k.split("\u0000"); return roleOfGroup[a] === fromRole && roleOfGroup[b] === toRole; }).map(([, n]) => n));
+  const flowFrom = fromRole => sum([...flowMain.entries()].filter(([k]) => roleOfGroup[k.split("\u0000")[0]] === fromRole).map(([, n]) => n));
+
+  const kc = {template: 0, listing: 0, editorial: 0, tag_byline: 0}; for (const l of links) kc[l[5]] += l[4];
+  M.kinds = kc;
+  M.noindex_recv = sum(links.filter(l => l[5] === "tag_byline").map(l => l[4]));
+  const LISTINGISH = new Set([...LISTING_ROLES, "legacy"]);
+  const prio = p => p.ed_src == null ? (p.sd >= SET.high_sd ? "High" : p.sd >= SET.med_sd ? "Medium" : "Low")
+    : (p.sd >= SET.high_sd && p.ed_src <= 3 ? "High" : p.sd >= SET.med_sd && p.ed_src <= 5 ? "Medium" : "Low");
+  for (const p of all) p.prio = prio(p);
+  const contentAll = all.filter(p => p.role === "content");
+  M.topics = [...new Set(contentAll.map(p => p.topic).filter(Boolean))].sort().map(tp => {
+    const ps = contentAll.filter(p => p.topic === tp), lv = ps.filter(p => p.live);
+    return {name: tp, pages: ps.length, live: lv.length, imp: sum(ps.map(p => p.imp)), sd: sum(ps.map(p => p.sd)), inrank: sum(lv.map(p => p.inrank)),
+      no_ed: avail.links ? lv.filter(p => p.ed_src === 0).length : null, orphans: ps.filter(p => p.orphan).length, orphan_imp: sum(ps.filter(p => p.orphan).map(p => p.imp))};
+  });
+
+  // ---- 1. segmentation score (/10): coverage 5, purity 3, topic dimension 2 ----
+  const cov = livePages.filter(p => p.old !== "(none)").length / Math.max(1, livePages.length);
+  const ct = counter(); for (const p of all) if (p.fetched) inc(ct, p.old + "\u0000" + p.group);
+  const byOld = new Map();
+  for (const [k, n] of ct) { const [o, g] = k.split("\u0000"); if (o === "(none)") continue; if (!byOld.has(o)) byOld.set(o, counter()); inc(byOld.get(o), g, n); }
+  // a current group matches an audit group of the same name, else the audit group holding most of its pages
+  const match = dict(); for (const [o, c] of byOld) match[o] = ORDER.includes(o) ? o : topN(c, 1)[0][0];
+  let pureN = 0, groupedN = 0; const leaks = [];
+  for (const [o, c] of byOld) for (const [g, n] of c) { groupedN += n; if (g === match[o]) pureN += n; else leaks.push({old: o, group: g, role: roleOfGroup[g], pages: n}); }
+  leaks.sort((a, b) => b.pages - a.pages);
+  const fkey = path => path === "/" ? "/" : (path.match(/\//g) || []).length === 2 ? "=" + path : path.split("/")[1];
+  const ungrouped = counter();
+  for (const p of all) if (p.fetched && p.role !== "legacy" && (p.old === "(none)" || match[p.old] !== p.group)) inc(ungrouped, [fkey(p.path), p.group, p.old].join("\u0000"));
+  const liveContent = livePages.filter(p => p.role === "content");
+  const topicSegExists = all.some(p => p.tseg);
+  const topicCov = liveContent.filter(p => p.tseg).length / Math.max(1, liveContent.length);
+  const topicMissing = counter(); for (const p of liveContent) if (!p.tseg && p.topic) inc(topicMissing, p.topic);
+  const purity = groupedN ? pureN / groupedN : 0;
+  const segChecks = [{key: "coverage", value: cov, pts: +(5 * cov).toFixed(1), max: 5}, {key: "purity", value: purity, pts: +(3 * purity).toFixed(1), max: 3}, {key: "topic", value: topicCov, pts: +(2 * topicCov).toFixed(1), max: 2}];
+  const ungroupedRows = [...ungrouped.entries()].sort((a, b) => b[1] - a[1]).map(([k, n]) => { const [folder, group, now] = k.split("\u0000"); return {folder, group, role: roleOfGroup[group], now, pages: n}; });
+  const perGroup = counter(); for (const u of ungroupedRows) inc(perGroup, u.group, u.pages);
+  const noneLive = livePages.filter(p => p.old === "(none)").map(p => p.path).sort();
+  M.segmentation = {score: +sum(segChecks.map(c => c.pts)).toFixed(1), checks: segChecks, live: livePages.length, live_grouped: livePages.length - noneLive.length, grouped: groupedN, leaks, leak_pages: groupedN - pureN,
+    ungrouped: ungroupedRows.filter(u => perGroup.get(u.group) >= 3 || u.now === "(none)"), none_live: noneLive.slice(0, 10), none_live_n: noneLive.length, topic_seg_exists: topicSegExists,
+    topic_articles: liveContent.length, topic_grouped: liveContent.filter(p => p.tseg).length, topic_missing: [...topicMissing.entries()].sort((a, b) => b[1] - a[1])};
+
+  // ---- 2. zoning score (/10): repeated blocks in main 5, taxonomy links vs in-text 3, footer share 2 ----
+  const POS = dict(); for (const o of T("positions") || []) POS[o.origin_position] = (POS[o.origin_position] || 0) + countOf(o);
+  const allLinks = sum(Object.values(POS)), footerShare = allLinks ? (POS.footer || 0) / allLinks : 0;
+  const contentLive = livePages.filter(p => !LISTINGISH.has(p.role));
+  const edOrigins = new Set(links.filter(l => l[5] === "editorial").map(l => l[1]));
+  const edShare = contentLive.filter(p => edOrigins.has(p.url)).length / Math.max(1, contentLive.length);
+  const mainN = Math.max(1, POS.main || 0), tagShare = Math.min(1, kc.tag_byline / Math.max(1, kc.editorial));
+  const fcomp = {};
+  for (const o of T("footer") || []) { const tp = pg(o.target), k = tp && (tp.role === "content" || tp.role === "proof") ? "related" : tp && tp.role === "taxonomy" ? "tags" : "site"; fcomp[k] = (fcomp[k] || 0) + countOf(o); }
+  if (Object.keys(fcomp).length) fcomp.site = (fcomp.site || 0) + Math.max(0, (POS.footer || 0) - sum(Object.values(fcomp)));   // targets beyond a 1,000-row cap
+  const cta = links.filter(l => l[5] === "editorial" && pg(l[2]) && pg(l[2]).role === "money" && kind(l[3], []) === "generic");
+  if (avail.links && avail.positions) {
+    const zonChecks = [{key: "menu_main", value: kc.template, share: kc.template / mainN, pts: +(5 * Math.max(0, 1 - kc.template / mainN)).toFixed(1), max: 5},
+      {key: "tag_main", value: kc.tag_byline, share: tagShare, pts: +(3 * (1 - tagShare)).toFixed(1), max: 3},
+      {key: "footer", value: footerShare, pts: +(2 * Math.min(1, Math.max(0, (0.5 - footerShare) / 0.35))).toFixed(1), max: 2}];
+    const zscore = +sum(zonChecks.map(c => c.pts)).toFixed(1);
+    const tmplTop = topN(pairSrc, 20).filter(([, n]) => n >= SET.template_min).map(([k, n]) => { const [t, a] = k.split("\u0000"); return {target: pathOf(t), role: roleOfUrl(t), anchor: a, pages: n}; });
+    M.zoning = {score: zscore, optimized: zscore >= 7, checks: zonChecks, positions: POS, all_links: allLinks, content_pages: contentLive.length, ed_share: edShare, footer_comp: fcomp, template_top: tmplTop,
+      examples: [{key: "menu", links: kc.template, pages: [...pairSrc.values()].reduce((a, v) => Math.max(a, v), 0), pairs: [...pairSrc.values()].filter(v => v >= SET.template_min).length},
+        {key: "tags", links: M.noindex_recv, pages: new Set(links.filter(l => l[5] === "tag_byline").map(l => l[1])).size},
+        {key: "cta", links: sum(cta.map(l => l[4])), pages: new Set(cta.map(l => l[1])).size},
+        {key: "footer", links: POS.footer || 0, pages: livePages.length, share: footerShare}]};
+  } else M.zoning = null;
+  M.positions = POS; M.all_links = allLinks;
+
+  // ---- 3. orphans, verdict from the live HTTP status when the agent could check it ----
+  const OS = R.orphan_status || {};
+  const verdict = (p, s) => { if (p.url.includes("?")) return "param"; if (s == null || [401, 403, 405, 429].includes(s) || s >= 500) return "check";
+    if (s === 200) return p.imp >= 100 || p.clk > 0 ? "relink" : "leave"; if (s === 302 || s === 307) return "temp"; if (s >= 300 && s < 400) return "redirected"; return p.imp >= 100 ? "lost" : "dead"; };
+  M.orphans = all.filter(p => p.orphan).sort((a, b) => b.imp - a.imp).map(p => { const s = OS[p.url] || {}, st = s.status == null || !isFinite(+s.status) ? null : +s.status;
+    let loc = null; try { loc = s.location ? new URL(s.location, p.url).href : null; } catch (e) { loc = null; }
+    return {url: p.url, path: p.path, group: p.group, topic: p.topic, imp: p.imp, clk: p.clk, visits: p.visits, bot: p.bot, status: st, location: loc, loc_status: loc && pg(loc) ? pg(loc).status : null, verdict: verdict(p, st)}; });
+  const vsum = {}; for (const o of M.orphans) { const v = vsum[o.verdict] ||= {n: 0, imp: 0}; v.n++; v.imp += o.imp; }
+  M.orphan_summary = vsum; M.orphan_checked = M.orphans.filter(o => o.status != null).length;
+
+  // ---- 4. PageRank simulation on the full graph (all zones), self-links dropped ----
+  const GR = (T("graph") || []).map(o => [o.origin, o.target, countOf(o)]).filter(([o, t, n]) => n && o !== t);
+  function pagerank(edges, d = 0.85, it = 100) {
+    const id = new Map(), urls = [], node = u => { let i = id.get(u); if (i === undefined) { i = urls.length; id.set(u, i); urls.push(u); } return i; };
+    const E = edges.map(([o, t, n]) => [node(o), node(t), n]), N = urls.length, out = new Float64Array(N);
+    for (const [o, , n] of E) out[o] += n;
+    let pr = new Float64Array(N).fill(1 / N);
+    for (let k = 0; k < it; k++) {
+      let dangling = 0; for (let u = 0; u < N; u++) if (!out[u]) dangling += pr[u];
+      const nw = new Float64Array(N).fill((1 - d) / N + d * dangling / N);
+      for (const [o, t, n] of E) nw[t] += d * pr[o] * n / out[o];
+      let delta = 0; for (let u = 0; u < N; u++) delta += Math.abs(nw[u] - pr[u]); pr = nw; if (delta < 1e-9) break;
+    }
+    const m = new Map(); urls.forEach((u, i) => m.set(u, pr[i])); return m;
+  }
+  function spearman(xs, ys) {
+    const rk = v => { const order = v.map((_, i) => i).sort((a, b) => v[a] - v[b]), r = new Array(v.length); let i = 0;
+      while (i < order.length) { let j = i; while (j + 1 < order.length && v[order[j + 1]] === v[order[i]]) j++; for (let k = i; k <= j; k++) r[order[k]] = (i + j) / 2; i = j + 1; } return r; };
+    const rx = rk(xs), ry = rk(ys), n = xs.length, mx = (n - 1) / 2; let c = 0, vx = 0, vy = 0;
+    for (let i = 0; i < n; i++) { c += (rx[i] - mx) * (ry[i] - mx); vx += (rx[i] - mx) ** 2; vy += (ry[i] - mx) ** 2; }
+    return vx && vy ? c / Math.sqrt(vx * vy) : 0;
+  }
+  const before = avail.graph ? pagerank(GR) : null;
+
+  // ---- 5. proposals: hub blocks, same-topic links, content -> money page ----
+  const HUB = dict();
+  for (const p of livePages) if (p.role === "hub" && p.topic && (!HUB[p.topic] || pg(HUB[p.topic]).inrank < p.inrank)) HUB[p.topic] = p.url;
+  const TM = dict(Object.entries(R.topic_money || {})), BYPATH = new Map(livePages.map(p => [p.path, p.url]));
+  const existing = new Set((avail.graph ? GR : OTA).map(r => r[0] + "\u0000" + r[1]));
+  const kwOk = k => { k = String(k).toLowerCase(); return !brand.some(b => k.includes(b)) && !k.startsWith("site:") && !k.includes(","); };   // "," = a raw GSC export row
+  const kws = p => p.kw.filter(kwOk);
+  const anchorFor = (p, i = 0) => { const ks = kws(p), opts = ks.length ? ks : [p.title || p.path]; return opts[i % Math.max(1, Math.min(3, ks.length))]; };
+  const props = [], seen = new Set(), sent = counter();
+  const propose = (s, r, strategy, host, simulated = true, i = 0) => {
+    const key = s + "\u0000" + r;
+    if (s !== r && !seen.has(key) && (!simulated || !existing.has(key))) { seen.add(key); inc(sent, s);
+      props.push({sender: s, sender_group: pg(s).group, receiver: r, receiver_group: pg(r).group, host, anchor: anchorFor(pg(r), i), strategy, simulated: simulated && avail.graph}); }
+  };
+  const arts = livePages.filter(p => p.role === "content");
+  for (const [tp, hub] of Object.entries(HUB)) for (const p of arts.filter(p => p.topic === tp && p.sd > 0).sort((a, b) => b.sd - a.sd).slice(0, 10)) propose(hub, p.url, "hub", hub);
+  const byInrank = [...arts].sort((a, b) => b.inrank - a.inrank);
+  for (const r of [...arts].sort((a, b) => b.sd - a.sd)) {
+    if (r.prio !== "High" && r.prio !== "Medium") continue;
+    const senders = byInrank.filter(s => s.topic && s.topic === r.topic && s.url !== r.url && !existing.has(s.url + "\u0000" + r.url) && (sent.get(s.url) || 0) < SET.sender_cap);
+    senders.slice(0, r.prio === "High" ? 5 : 3).forEach((s, i) => propose(s.url, r.url, "peer", "in-text", true, i));
+  }
+  for (const a of arts) if (a.sd >= SET.med_sd && TM[a.topic] && BYPATH.has(TM[a.topic])) propose(a.url, BYPATH.get(TM[a.topic]), "product", "in-text", false);
+  M.proposals = props;
+
+  const recvOf = s => new Set(props.filter(x => x.strategy === s).map(x => x.receiver));
+  if (before) {
+    const after = pagerank(GR.concat(props.filter(x => x.simulated).map(x => [x.sender, x.receiver, 1])));
+    const crawled = [...before.keys()].filter(u => pg(u) && pg(u).fetched);
+    const rankOf = pr => { const m = new Map(); [...crawled].sort((a, b) => pr.get(b) - pr.get(a)).forEach((u, i) => m.set(u, i + 1)); return m; };
+    const rb = rankOf(before), ra = rankOf(after), gain = new Map([...before].map(([u, v]) => [u, after.get(u) / v - 1]));
+    const gainBy = {};
+    for (const s of ["hub", "peer"]) { const pr = pagerank(GR.concat(props.filter(x => x.strategy === s).map(x => [x.sender, x.receiver, 1]))); gainBy[s] = new Map([...before].map(([u, v]) => [u, pr.get(u) / v - 1])); }
+    const medBy = (s, us) => us.size ? +median([...us].map(u => (gainBy[s].get(u) || 0) * 100)).toFixed(1) : 0;
+    const cmp = livePages.filter(p => before.has(p.url));
+    const lane = x => { const s = pg(x.sender), r = pg(x.receiver);
+      return [x.strategy, s.group, x.strategy === "hub" ? s.path : s.topic, x.host === "in-text" ? "in-text" : "hub", r.group, x.strategy === "product" ? r.path : r.topic].join("\u0000"); };
+    const lanes = new Map(); for (const x of props) { const k = lane(x); if (!lanes.has(k)) lanes.set(k, []); lanes.get(k).push(x); }
+    const money = [...before.keys()].filter(u => pg(u) && pg(u).role === "money"), mb = sum(money.map(u => before.get(u)));
+    const receivers = new Set(props.map(x => x.receiver));
+    M.sim = {rho: +spearman(cmp.map(p => before.get(p.url)), cmp.map(p => p.inrank)).toFixed(3), nodes: before.size, crawled: crawled.length, edges: GR.length, proposals: props.length, receivers: receivers.size,
+      unfetched_targets: [...before.keys()].filter(u => pg(u) && !pg(u).fetched).length, money_change: mb ? +((sum(money.map(u => after.get(u))) / mb - 1) * 100).toFixed(2) : 0,
+      by_strategy: Object.fromEntries(["hub", "peer", "product"].map(s => [s, {links: props.filter(x => x.strategy === s).length, receivers: recvOf(s).size, median_gain: gainBy[s] ? medBy(s, recvOf(s)) : null}])),
+      rows: [...lanes].map(([k, v]) => { const [strategy, src_group, src, host, dst_group, dst] = k.split("\u0000");
+        return {strategy, src_group, src, host, dst_group, dst, links: v.length, n_src: new Set(v.map(x => x.sender)).size, n_dst: new Set(v.map(x => x.receiver)).size, gain: gainBy[strategy] ? medBy(strategy, new Set(v.map(x => x.receiver))) : null}; })
+        .sort((a, b) => ["hub", "peer", "product"].indexOf(a.strategy) - ["hub", "peer", "product"].indexOf(b.strategy) || b.links - a.links),
+      top: [...receivers].filter(u => gain.has(u)).sort((a, b) => gain.get(b) - gain.get(a)).slice(0, 20).map(u => ({url: u, path: pg(u).path, group: pg(u).group, gain: +(gain.get(u) * 100).toFixed(1), rank_before: rb.get(u), rank_after: ra.get(u), links: props.filter(x => x.receiver === u).length}))};
+    for (const p of all) p.gain = before.has(p.url) ? +(gain.get(p.url) * 100).toFixed(1) : 0;
+    console.assert(Math.abs(sum([...before.values()]) - 1) < 1e-6 && Math.abs(sum([...after.values()]) - 1) < 1e-6, "PageRank must sum to 1");
+  } else { M.sim = null; for (const p of all) p.gain = null; }
+
+  // ---- targets (crawled pages with impressions; orphans live in their own report) ----
+  const newLinks = counter(); for (const x of props) inc(newLinks, x.receiver);
+  M.targets = all.filter(p => p.imp > 0 && !p.orphan && !["taxonomy", "pagination", "legacy"].includes(p.role)).sort((a, b) => b.sd - a.sd).map(p => ({url: p.url, path: p.path, group: p.group, topic: p.topic, title: p.title, live: p.live, prio: p.prio,
+    status: p.status, depth: p.depth, inrank: +p.inrank.toFixed(2), imp: p.imp, clk: p.clk, pos: p.pos ? +(+p.pos).toFixed(1) : null, sd: p.sd, ed_src: p.ed_src, lst: p.lst, bot: p.bot, visits: p.visits,
+    kw_in_anchor: p.kw_in_anchor, top_kw: kws(p).slice(0, 3), distinct_anchors: p.anchors.size, gain: p.gain, new_links: newLinks.get(p.url) || 0}));
+  M.crosstab = [...ct.entries()].map(([k, n]) => [...k.split("\u0000"), n]);
+
+  // ---- 7. anchors: existing editorial links worth re-anchoring (target has striking-distance impressions) ----
+  const anc = links.filter(l => l[5] === "editorial" && pg(l[2])).map(([go, o, t, a, n]) => [a, pg(t).group, kind(a, pg(t).kw.map(x => String(x).toLowerCase())), n, t, o]);
+  const broken = all.filter(p => p.fetched && p.status && p.status >= 300 && (p.ed || p.lst)).map(p => ({url: p.url, status: p.status, ed: p.ed, lst: p.lst})).sort((a, b) => (b.ed + b.lst) - (a.ed + a.lst));
+  M.broken_total = broken.length; M.broken_links = sum(broken.map(r => r.ed + r.lst));
+  const fixes = [];
+  for (const [a, g, kd, n, t, o] of anc) {
+    const pt = pg(t); if (pt.sd <= 0 || !pt.live) continue;
+    const titleCopy = !!pt.title && a.trim().toLowerCase().includes(String(pt.title).trim().toLowerCase());
+    if (!kws(pt).length || String(anchorFor(pt)).toLowerCase() === a.trim().toLowerCase()) continue;   // nothing better to suggest
+    if (["generic", "url", "empty", "descriptive"].includes(kd) || (titleCopy && kd !== "query")) fixes.push({origin: o, target: t, target_path: pt.path, anchor: a, n, kind: titleCopy ? "title" : kd, suggested: anchorFor(pt), prio: pt.prio, sd: pt.sd, group: pt.group});
+  }
+  const PRK = {High: 0, Medium: 1, Low: 2}, KO = {generic: 0, url: 0, empty: 0, title: 1, descriptive: 2};
+  M.anchor_fixes = fixes.sort((a, b) => PRK[a.prio] - PRK[b.prio] || KO[a.kind] - KO[b.kind] || b.sd - a.sd);
+  M.cta = {links: sum(cta.map(l => l[4])), pages: new Set(cta.map(l => l[1])).size};
+
+  // ---- 8. strategies: numbers only, sentences live in the report ----
+  const names = role => RS[role].names.map(n => `"${n}"`).join(" OR ") || "–";
+  const scope = us => ({pages: us.size, sd: sum([...us].map(u => pg(u).sd))});
+  const hubTop = new Set(props.filter(x => x.strategy === "hub" && pg(x.receiver).role === "content").map(x => x.receiver));
+  const high = arts.filter(p => p.prio === "High"), medP = arts.filter(p => p.prio === "Medium");
+  const deep = new Set(arts.filter(p => (p.depth || 0) >= 5).map(p => p.url));
+  const mappedMoney = new Set(Object.values(TM).filter(v => BYPATH.has(v)));
+  const p2a = new Set(); for (const mp of mappedMoney) arts.filter(a => TM[a.topic] === mp && a.sd > 0).sort((a, b) => b.sd - a.sd).slice(0, 5).forEach(a => p2a.add(a.url));
+  const home = livePages.find(p => p.role === "home"), homeOut = counter();
+  if (home) for (const [o, t, n] of GR) if (o === home.url && pg(t)) inc(homeOut, pg(t).group, n);
+  const moneyLive = livePages.filter(p => p.role === "money");
+  M.strategies = [
+    {key: "hub", scope: scope(hubTop), pages: new Set(props.filter(x => x.strategy === "hub").map(x => x.host)).size, hubs: livePages.filter(p => p.role === "hub").length, topic_hubs: Object.keys(HUB).length, receivers: hubTop.size, imp: sum([...hubTop].map(u => pg(u).sd)), deep: deep.size, simulated: avail.graph, filter: `page group = ${names("hub")}`},
+    {key: "peer", scope: scope(recvOf("peer")), pages: high.length, medium: medP.length, imp: sum(high.map(p => p.sd)), links: props.filter(x => x.strategy === "peer").length, simulated: avail.graph, filter: "follow_inlinks_main < 4 AND (gsc_impressions_pos_4_10 > 0 OR gsc_impressions_pos_11_13 > 0 OR gsc_impressions_pos_14_20 > 0)"},
+    {key: "product", scope: scope(recvOf("product")), pages: props.filter(x => x.strategy === "product").length, mapped: mappedMoney.size, current: flow("content", "money"), total: flowFrom("content"), cases: flow("content", "proof"), case_pages: livePages.filter(p => p.role === "proof").length, simulated: false, filter: `origin page group = ${names("content")} AND target page group = ${names("money")} AND origin_position = main`},
+    {key: "listing", scope: scope(deep), pagination: livePages.filter(p => p.role === "pagination").length, deep: deep.size, deep_imp: sum([...deep].map(u => pg(u).sd)), hubbed: [...hubTop].filter(u => deep.has(u)).length, simulated: false, filter: `page group = ${names("content")} AND depth >= 5`},
+    {key: "prod2art", scope: scope(p2a), mapped: mappedMoney.size, current: flow("money", "content"), pages: moneyLive.length, inrank: +mean(moneyLive.map(p => p.inrank)).toFixed(1), simulated: false, filter: `origin page group = ${names("money")} AND target page group = ${names("content")}`},
+    {key: "cta", links: M.cta.links, pages: M.cta.pages, simulated: false, filter: `anchor = "Learn more" AND target page group = ${names("money")}`},
+    {key: "home", out: Object.fromEntries(homeOut), total: sum([...homeOut.values()]), simulated: false, filter: home ? `origin = ${home.url}` : ""},
+    {key: "orphans", pages: vsum.relink?.n || 0, imp: vsum.relink?.imp || 0, simulated: false, filter: "fetched = false AND (gsc_impressions > 0 OR googlebot_hits > 0)"},
+    {key: "broken", pages: M.broken_total, links: M.broken_links, simulated: false, filter: "target_status_range = 3xx OR 4xx"},
+    {key: "tags", links: M.noindex_recv, simulated: false, filter: `target page group = ${names("taxonomy")}`},
+  ];
+
+  console.assert(sum(Object.values(vsum).map(v => v.n)) === M.orphans.length, "orphan verdicts must cover every orphan");
+  console.assert(0 <= M.segmentation.score && M.segmentation.score <= 10 && (!M.zoning || (0 <= M.zoning.score && M.zoning.score <= 10)), "scores in 0-10");
+  console.assert(props.every(x => x.sender !== x.receiver && (!x.simulated || !existing.has(x.sender + "\u0000" + x.receiver))), "no self or existing simulated link");
+  M.meta = {site: meta.site || (home ? home.url : ""), crawl: String(meta.crawl || ""), project: meta.project || "", env: meta.env || "app.oncrawl.com", seg: meta.seg || "", topic_seg: meta.topic_seg || "",
+    built: meta.built || "", orphans_checked_on: meta.orphans_checked_on || null, visits_artefact: ARTEFACT, prev: null};
+  return M;
+}
+
+// =====================================================================================================
+// REPORT
+// =====================================================================================================
+const FR = new URLSearchParams(location.search).get("lang") === "fr";
+const LOC = FR ? "fr-FR" : "en";
+const tr = (en, fr) => FR ? fr : en;
+document.documentElement.lang = FR ? "fr" : "en";
+if (FR) {
+  document.title = "Audit du maillage interne";
+  document.querySelector(".lang").setAttribute("aria-label", "Langue");
+  document.querySelectorAll("[data-fr]").forEach(el => el.innerHTML = el.dataset.fr);
+  document.querySelectorAll("[data-fr-ph]").forEach(el => el.placeholder = el.dataset.frPh);
+  document.querySelectorAll("[data-fr-title]").forEach(el => el.title = el.dataset.frTitle);
+}
+const store = {get() { try { return sessionStorage.getItem("il_audit_raw"); } catch (e) { return null; } }, set(v) { try { sessionStorage.setItem("il_audit_raw", v); return true; } catch (e) { return false; } }};
+document.querySelectorAll("[data-lang]").forEach(b => {
+  b.setAttribute("aria-pressed", String((b.dataset.lang === "fr") === FR));
+  b.onclick = () => { const u = new URL(location.href); u.searchParams.set("lang", b.dataset.lang); location.href = u; };
+});
+const nf = (n, d) => (+n).toLocaleString(LOC, d == null ? {maximumFractionDigits: 1} : {minimumFractionDigits: d, maximumFractionDigits: d});
+const K = FR ? " k" : "k";
+const fmt = n => n == null ? "–" : n >= 10000 ? nf(n / 1000, 0) + K : n >= 1000 ? nf(n / 1000, 1) + K : nf(Math.round(n * 10) / 10);
+const full = n => n == null ? "–" : Math.round(n).toLocaleString(LOC);
+const pct = n => nf(Math.round(n * 10) / 10) + (FR ? " %" : "%");
+const d1 = n => nf(n, 1);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const gn = g => esc(g);
+const safeUrl = u => /^https?:\/\//i.test(String(u)) ? esc(u) : "#";
+const ROLE_L = {home: ["Home page", "Page d'accueil"], hub: ["Hub or category pages", "Pages piliers ou catégories"], content: ["Content pages (articles, guides)", "Pages de contenu (articles, guides)"],
+  money: ["Money pages (products, services, offers)", "Pages business (produits, services, offres)"], proof: ["Proof pages (case studies, reviews)", "Pages de preuve (études de cas, avis)"],
+  taxonomy: ["Taxonomy pages (tags, authors)", "Pages de taxonomie (tags, auteurs)"], pagination: ["Page 2, 3… of the listings", "Pages 2, 3… des listes"], other: ["Other pages", "Autres pages"], legacy: ["Legacy URLs", "Anciennes URL"]};
+const rl = r => ROLE_L[r] ? tr(...ROLE_L[r]) : "";
+const PL = {"High": tr("High", "Haute"), "Medium": tr("Medium", "Moyenne"), "Low": tr("Low", "Basse")};
+const PCLS = {"High": "p-high", "Medium": "p-med", "Low": "p-low"};
+const missing = (el, en, fr) => { document.getElementById(el).innerHTML = `<div class="missing">${tr(en, fr)}</div>`; };
+
+function render(D) {
+  document.getElementById("report").hidden = false;
+    const RS = D.roles, AV = D.avail;
+  const S = Object.fromEntries(D.strategies.map(s => [s.key, s]));
+  const SEG = D.segmentation, Z = D.zoning, SIM = D.sim, META = D.meta, PREV = META.prev, CR = META.crawl.slice(0, 8);
+  const ORIGIN = (() => { try { return new URL(META.site).origin; } catch (e) { return ""; } })();
+  const sp = s => esc(ORIGIN ? String(s).replace(ORIGIN, "") : s);
+  const roleNames = r => RS[r].names.map(n => `<b>${gn(n)}</b>`).join(", ") || tr("none", "aucun");
+  document.querySelectorAll(".segname").forEach(e => e.textContent = META.seg || tr("(none)", "(aucune)"));
+  Highcharts.setOptions({chart: {style: {fontFamily: "system-ui,-apple-system,Segoe UI,Roboto,sans-serif"}}, credits: {enabled: false}, title: {text: null},
+    lang: FR ? {decimalPoint: ",", thousandsSep: " "} : {}});
+  const NEEDS_CODE = [`This section needs the link tables (links_main, positions, graph). They are too big for a chat agent: run the audit from Claude Code to get it (see AGENT.md).`,
+    `Cette section a besoin des tables de liens (links_main, positions, graph). Elles sont trop grosses pour un agent en mode chat : lancez l'audit depuis Claude Code pour l'obtenir (voir AGENT.md).`];
+
+  // ---------- tooltips ----------
+  const TERMS = {
+    inrank: ["Inrank: Oncrawl's internal popularity score, 0 to 10. It is a PageRank computed on your internal links only. The average per page is the safe comparison; summed shares are indicative.",
+             "Inrank : la note de popularité interne d'Oncrawl, de 0 à 10. C'est un PageRank calculé sur vos seuls liens internes. La moyenne par page est la comparaison la plus sûre ; les parts cumulées sont indicatives."],
+    simpr: SIM ? [`Simulated PageRank: a PageRank computed by this audit on the crawl's link graph (${full(SIM.edges)} edges, all zones), before and after adding the proposed links. Its rank correlation with Oncrawl's Inrank is ${nf(SIM.rho, 2)} here, so read the gains as orders of magnitude. The real Inrank will come from the next crawl.`,
+            `PageRank simulé : un PageRank calculé par cet audit sur le graphe de liens du crawl (${full(SIM.edges)} liens distincts, toutes zones), avant et après ajout des liens proposés. Sa corrélation de rang avec l'Inrank Oncrawl est de ${nf(SIM.rho, 2)} ici : lisez les gains comme des ordres de grandeur. L'Inrank réel viendra du prochain crawl.`]
+          : ["Simulated PageRank: needs the full link graph, available from Claude Code only.", "PageRank simulé : demande le graphe complet des liens, disponible depuis Claude Code seulement."],
+    editorial: ["In-text link: a followed link in the main content of a content page, placed by hand in the text. Excludes blocks repeated on many pages, links from listing pages (home, hubs, taxonomy, pagination), links to taxonomy pages and self-links.",
+                "Lien éditorial : un lien follow dans le contenu principal d'une page de contenu, posé à la main dans le texte. Exclut les blocs répétés sur de nombreuses pages, les liens des pages de liste (accueil, piliers, taxonomies, pagination), les liens vers les pages de taxonomie et les liens vers soi-même."],
+    indexable: ["Indexable page: crawled, answers 200 and carries no noindex. Only these pages can rank and hold Inrank.", "Page indexable : crawlée, répond 200 et ne porte pas de noindex. Seules ces pages peuvent se positionner et détenir de l'Inrank."],
+    orphan: ["Orphan page: a URL Google sees (Search Console impressions, Googlebot hits or organic visits) but that no crawled page links to.", "Page orpheline : une URL que Google voit (impressions Search Console, hits Googlebot ou visites organiques) mais vers laquelle aucune page crawlée ne pointe."],
+    sd: ["Impressions at positions 4 to 20: Search Console impressions where the page ranked between 4 and 20. More internal links move these results fastest.", "Impressions en positions 4 à 20 : impressions Search Console où la page s'est classée entre 4 et 20. C'est là que des liens internes supplémentaires font monter les résultats le plus vite."],
+    segmentation: ["Segmentation: Oncrawl's page groups, defined by rules on the URL (folders, patterns). Every Lens chart is filtered by it, so an incomplete segmentation under-counts whole parts of the site.", "Segmentation : les groupes de pages d'Oncrawl, définis par des règles sur l'URL (dossiers, motifs). Chaque graphique de la Lens est filtré dessus : une segmentation incomplète sous-estime des parties entières du site."],
+    zoning: ["Zoning: the zone of the page a link sits in (header, nav, main, aside, footer), detected from the HTML5 tags. Oncrawl uses it to tell template links from in-text links.", "Zoning : la zone de la page où se trouve un lien (header, nav, main, aside, footer), détectée via les balises HTML5. Oncrawl s'en sert pour distinguer les liens de gabarit des liens éditoriaux."],
+    hub: ["Hub page (host): a page that introduces a topic and links to the best pages of that topic, like a category page or a guide. It collects popularity from the menu and passes it on.", "Page pilier (hôte) : une page qui introduit une thématique et pointe vers les meilleures pages de cette thématique, comme une page catégorie ou un guide. Elle collecte la popularité du menu et la redistribue."],
+    menu: [`Repeated block: a link repeated with the same target and anchor on ${D.settings.template_min} pages or more (threshold of this audit): menus, CTAs, category bars. When such a block sits in the main zone, it passes for content.`, `Bloc répété : un lien répété avec la même cible et la même ancre sur ${D.settings.template_min} pages ou plus (seuil de cet audit) : menus, CTA, barres de catégories. Quand un tel bloc est dans la zone principale, il passe pour du contenu.`],
+    group: ["Page group: a set of pages sharing the same template. This audit rebuilds the groups from URL rules your agent proposed and you confirmed, then compares them with the current segmentation, to find pages with no group or in the wrong one.", "Groupe de pages : un ensemble de pages du même gabarit. Cet audit reconstruit les groupes à partir de règles d'URL proposées par votre agent et validées par vous, puis les compare à la segmentation actuelle, pour trouver les pages sans groupe ou mal rangées."],
+    listing: ["Listing page: a page whose job is to list other pages (home, hubs, taxonomy, pagination). Its links are counted apart from in-text links.", "Page de liste : une page dont le rôle est de lister d'autres pages (accueil, piliers, taxonomies, pagination). Ses liens sont comptés à part des liens éditoriaux."],
+    visits: ["SEO visits: organic visits from the logs." + (META.visits_artefact ? ` ${META.visits_artefact.pages} pagination URLs show exactly ${META.visits_artefact.value} visits each, a log artefact: those visits are excluded.` : ""), "Visites SEO : visites organiques issues des logs." + (META.visits_artefact ? ` ${META.visits_artefact.pages} URL de pagination affichent exactement ${META.visits_artefact.value} visites chacune, un artefact de logs : ces visites sont exclues.` : "")],
+    prio: [`Priority: High = at least ${full(D.settings.high_sd)} impressions at positions 4 to 20 and 3 in-text links received or fewer. Medium = at least ${full(D.settings.med_sd)} such impressions and 5 in-text links or fewer. Low = the rest.` + (AV.links ? "" : " Without the link tables, only the impressions decide."), `Priorité : Haute = au moins ${full(D.settings.high_sd)} impressions en positions 4 à 20 et 3 liens éditoriaux reçus ou moins. Moyenne = au moins ${full(D.settings.med_sd)} impressions de ce type et 5 liens éditoriaux ou moins. Basse = le reste.` + (AV.links ? "" : " Sans les tables de liens, seules les impressions décident.")],
+    follow: ["Followed link: a link Google is allowed to follow (no nofollow attribute). Only followed links pass popularity.", "Lien suivi (follow) : un lien que Google a le droit de suivre (sans attribut nofollow). Seuls les liens suivis transmettent de la popularité."],
+    pages: ["Pages analysed: every crawled page plus every page Google sees that the crawl did not reach, when an audit rule matches its URL. Bot probes and tracking-parameter variants are excluded.", "Pages analysées : toutes les pages crawlées plus toutes les pages que Google voit et que le crawl n'a pas atteintes, quand une règle de l'audit reconnaît leur URL. Les sondes de bots et les variantes avec paramètres de tracking sont exclues."],
+    kinds: [`Link kinds found in the main zone: ${full(D.kinds.template)} repeated-block links, ${full(D.kinds.listing)} listing links, ${full(D.kinds.tag_byline)} taxonomy links, ${full(D.kinds.editorial)} in-text links.`, `Types de liens trouvés dans la zone principale : ${full(D.kinds.template)} liens de blocs répétés, ${full(D.kinds.listing)} liens de pages de liste, ${full(D.kinds.tag_byline)} liens de taxonomie, ${full(D.kinds.editorial)} liens éditoriaux.`],
+  };
+  const T = (k, label) => `<dfn data-t="${k}">${label}</dfn>`;
+  const applyTips = () => document.querySelectorAll("dfn[data-t]").forEach(d => { const t = TERMS[d.dataset.t]; if (!t) return; d.dataset.tip = tr(...t); d.title = tr(...t); d.tabIndex = 0; });
+  document.getElementById("defs").innerHTML = Object.values(TERMS).map(t => `<li>${esc(tr(...t)).replace(/^([^:]+:)/, "<b>$1</b>")}</li>`).join("");
+
+  const TABS = ["tool", "priorities", "anchors"];
+  const showTab = () => { const h = location.hash.slice(1), id = TABS.includes(h) ? h : "tool";
+    TABS.forEach(t => { document.getElementById(t).hidden = t !== id; document.querySelector(`nav a[href="#${t}"]`).classList.toggle("on", t === id); });
+    Highcharts.charts.forEach(c => c && c.reflow()); scrollTo(0, 0); };
+  addEventListener("hashchange", showTab);
+
+  const nPages = D.groups.reduce((s, g) => s + g.pages, 0).toLocaleString(LOC);
+  const host = ORIGIN.replace(/^https?:\/\//, "") || tr("this site", "ce site");
+  document.getElementById("sub").textContent = tr(
+    `${host}, crawl ${CR}${META.project ? ` (project ${META.project})` : ""}, segmentation "${META.seg}", Google Search Console + logs when connected. ${nPages} pages analysed (crawled pages plus orphan pages that Google sees).`,
+    `${host}, crawl ${CR}${META.project ? ` (projet ${META.project})` : ""}, segmentation « ${META.seg} », Google Search Console + logs quand ils sont connectés. ${nPages} pages analysées (pages crawlées plus pages orphelines que Google voit).`);
+  document.getElementById("pagefoot").textContent = tr(
+    `Data: Oncrawl MCP, ${META.env}, crawl ${META.crawl}. Raw answers copied by your agent${META.built ? ` on ${META.built}` : ""}, every figure computed in this page. ${META.orphans_checked_on ? `Orphan page status checked live on ${META.orphans_checked_on}.` : "Orphan page status not checked."} Template: github.com/phtraversac/agentic_audit.`,
+    `Données : MCP Oncrawl, ${META.env}, crawl ${META.crawl}. Réponses brutes copiées par votre agent${META.built ? ` le ${META.built}` : ""}, chaque chiffre est calculé dans cette page. ${META.orphans_checked_on ? `Statut des pages orphelines vérifié en direct le ${META.orphans_checked_on}.` : "Statut des pages orphelines non vérifié."} Modèle : github.com/phtraversac/agentic_audit.`);
+  const scoreCard = (lbl, score, yes, text) => `<div><div class="lbl">${lbl}</div><div class="big">${nf(score, 1)}<small> / 10</small></div>
+    <span class="yn ${yes ? "p-ok" : score >= 4 ? "p-med" : "p-high"}">${yes ? tr("Optimized", "Optimisé") : tr("Not optimized", "Non optimisé")}</span><div class="kw" style="margin-top:6px">${tr("Optimized from 7 / 10", "Optimisé à partir de 7 / 10")}</div></div><div><p style="margin:0;font-size:15.5px">${text}</p></div>`;
+  const checkTable = rows => `<thead><tr><th>${tr("Check", "Critère")}</th><th>${tr("Today", "Aujourd'hui")}</th><th class="n">${tr("Points", "Points")}</th><th>${tr("What to do", "Quoi faire")}</th></tr></thead><tbody>` +
+    rows.map(([name, val, pts, max, fix]) => `<tr><td>${name}</td><td>${val}</td><td class="n" style="white-space:nowrap"><b>${nf(pts, 1)}</b> / ${max}</td><td class="kw" style="font-size:13.5px">${fix}</td></tr>`).join("") + "</tbody>";
+
+  // ================= TAB 1.1 segmentation =================
+  const SC = Object.fromEntries(SEG.checks.map(c => [c.key, c]));
+  const noneN = SEG.live - SEG.live_grouped, topicN = SEG.topic_missing.reduce((a, [, n]) => a + n, 0);
+  const topicList = SEG.topic_missing.map(([t, n]) => `${esc(t)} (${n})`).join(", ");
+  const pagLeaks = SEG.leaks.filter(l => l.role === "pagination"), otherLeaks = SEG.leaks.filter(l => l.role !== "pagination");
+  document.getElementById("segscore").innerHTML = scoreCard(tr("Segmentation score", "Score de segmentation"), SEG.score, SEG.score >= 7, tr(
+    `"${esc(META.seg)}" groups <b>${full(SEG.live_grouped)} of the ${full(SEG.live)}</b> ${T("indexable", "indexable")} pages (${pct(SC.coverage.value * 100)})${noneN ? `; ${noneN} still count as "No group" in every Lens chart` : ""}. ${pct(SC.purity.value * 100)} of grouped pages sit in the right template${SEG.leak_pages ? `: the ${SEG.leak_pages} others are ${pagLeaks.length && pagLeaks.reduce((a, l) => a + l.pages, 0) >= SEG.leak_pages / 2 ? "mostly pagination pages caught by their folder's group" : "listed below"}` : ""}. ${SEG.topic_seg_exists ? `The "${esc(META.topic_seg)}" segmentation covers ${full(SEG.topic_grouped)} of the ${full(SEG.topic_articles)} indexable content pages (${pct(SC.topic.value * 100)})${topicN ? `; ${SEG.topic_missing.length} topics are missing` : ""}.` : "No second segmentation by topic exists yet."}`,
+    `« ${esc(META.seg)} » regroupe <b>${full(SEG.live_grouped)} des ${full(SEG.live)}</b> pages ${T("indexable", "indexables")} (${pct(SC.coverage.value * 100)})${noneN ? ` ; ${noneN} comptent encore comme « Aucun groupe » dans chaque graphique de la Lens` : ""}. ${pct(SC.purity.value * 100)} des pages groupées sont dans le bon gabarit${SEG.leak_pages ? ` : les ${SEG.leak_pages} autres sont ${pagLeaks.length && pagLeaks.reduce((a, l) => a + l.pages, 0) >= SEG.leak_pages / 2 ? "surtout des pages de pagination attrapées par le groupe de leur dossier" : "listées plus bas"}` : ""}. ${SEG.topic_seg_exists ? `La segmentation « ${esc(META.topic_seg)} » couvre ${full(SEG.topic_grouped)} des ${full(SEG.topic_articles)} pages de contenu indexables (${pct(SC.topic.value * 100)})${topicN ? ` ; ${SEG.topic_missing.length} thématiques manquent` : ""}.` : "Il n'existe pas encore de seconde segmentation par thématique."}`));
+  const leakList = ls => ls.map(l => `${esc(l.old)} → ${gn(l.group)} ${l.pages}`).join(", "), sumP = ls => ls.reduce((a, l) => a + l.pages, 0);
+  const leakFix = [pagLeaks.length ? tr(`Move the pagination group above the folder groups: ${sumP(pagLeaks)} pagination pages leak (${leakList(pagLeaks)}).`, `Placez le groupe de pagination au-dessus des groupes de dossier : ${sumP(pagLeaks)} pages de pagination fuient (${leakList(pagLeaks)}).`) : "",
+    otherLeaks.length ? tr(`Fix the folder rules for ${sumP(otherLeaks)} more pages (${leakList(otherLeaks.slice(0, 8))}${otherLeaks.length > 8 ? "…" : ""}), see the table below.`, `Corrigez les règles de dossier pour ${sumP(otherLeaks)} pages de plus (${leakList(otherLeaks.slice(0, 8))}${otherLeaks.length > 8 ? "…" : ""}), voir le tableau ci-dessous.`) : ""].filter(Boolean).join(" ");
+  document.getElementById("segchecks").innerHTML = checkTable([
+    [tr("Indexable pages that have a group", "Pages indexables qui ont un groupe"), `${full(SEG.live_grouped)} / ${full(SEG.live)} ${tr("indexable pages", "pages indexables")} (${pct(SC.coverage.value * 100)})`, SC.coverage.pts, SC.coverage.max, noneN ? tr(`Add a rule for: ${SEG.none_live.map(p => `<code>${esc(p)}</code>`).join(", ")}${SEG.none_live_n > SEG.none_live.length ? ` and ${SEG.none_live_n - SEG.none_live.length} more` : ""}.`, `Ajoutez une règle pour : ${SEG.none_live.map(p => `<code>${esc(p)}</code>`).join(", ")}${SEG.none_live_n > SEG.none_live.length ? ` et ${SEG.none_live_n - SEG.none_live.length} de plus` : ""}.`) : tr("Nothing to add.", "Rien à ajouter.")],
+    [tr("Grouped pages sitting in the template this audit reads from their URL", "Pages groupées dans le gabarit que cet audit lit dans leur URL"), `${full(SEG.grouped - SEG.leak_pages)} / ${full(SEG.grouped)} ${tr("grouped crawled pages", "pages crawlées groupées")} (${pct(SC.purity.value * 100)})`, SC.purity.pts, SC.purity.max, leakFix || tr("Nothing to fix.", "Rien à corriger.")],
+    [tr("A second segmentation by topic: indexable content pages it puts in a group", "Une seconde segmentation par thématique : pages de contenu indexables qu'elle range dans un groupe"), SEG.topic_seg_exists ? `${full(SEG.topic_grouped)} / ${full(SEG.topic_articles)} (${pct(SC.topic.value * 100)})` : tr("Absent", "Absente"), SC.topic.pts, SC.topic.max,
+      !SEG.topic_seg_exists ? tr("Create a topic segmentation, one group per topic folder.", "Créez une segmentation par thématique, un groupe par dossier thématique.")
+      : topicN ? tr(`Add the missing topics to "${esc(META.topic_seg)}": ${topicList}.`, `Ajoutez les thématiques manquantes à « ${esc(META.topic_seg)} » : ${topicList}.`) : tr("Nothing to fix.", "Rien à corriger.")],
+  ]);
+  const isDup = u => u.folder.startsWith("=") && SEG.ungrouped.some(v => v.group === u.group && "=/" + v.folder + "/" === u.folder);
+  const segRows = SEG.ungrouped.filter(u => !isDup(u)).map(u => ({...u, pages: u.pages + SEG.ungrouped.filter(d => isDup(d) && d.group === u.group && d.folder === "=/" + u.folder + "/").reduce((a, d) => a + d.pages, 0)}));
+  const segGroups = Object.values(segRows.reduce((m, u) => ((m[u.group] ||= {group: u.group, role: u.role, pages: 0, folders: []}).pages += u.pages, m[u.group].folders.push(u), m), dict()))
+    .sort((a, b) => (b.role === "pagination") - (a.role === "pagination") || b.pages - a.pages);
+  const RULE = dict((window.__RAW__.rules || []).map(r => [r.name, r]).reverse());
+  const segRule = g => g.role === "pagination"
+    ? tr(`URL matches <code>${esc(RULE[g.group]?.match || "")}</code> → ${gn(g.group)}. <b>Place this group first.</b>`, `L'URL correspond à <code>${esc(RULE[g.group]?.match || "")}</code> → ${gn(g.group)}. <b>Placez ce groupe en premier.</b>`)
+    : [g.folders.some(u => !u.folder.startsWith("=") && u.folder !== "/") ? `<code>url_first_path</code> ${tr("is one of", "est l'un de")} ${g.folders.filter(u => !u.folder.startsWith("=") && u.folder !== "/").map(u => `<code>/${esc(u.folder)}</code>`).join(", ")}` : "",
+       g.folders.some(u => u.folder.startsWith("=") || u.folder === "/") ? `<code>urlpath</code> ${tr("is one of", "est l'un de")} ${g.folders.filter(u => u.folder.startsWith("=") || u.folder === "/").map(u => `<code>${esc(u.folder.replace(/^=/, ""))}</code>`).join(", ")}` : ""]
+      .filter(Boolean).join(tr(" or ", " ou ")) + ` → ${gn(g.group)}`;
+  const fshow = u => u.folder === "/" || u.folder.startsWith("=") ? esc(u.folder.replace(/^=/, "")) : `/${esc(u.folder)}/`;
+  document.querySelector("#segrules tbody").innerHTML = segGroups.map(g => `<tr class="grp"><td>${gn(g.group)}</td><td class="n">${g.pages}</td><td>${g.role === "pagination" ? tr("1 pattern", "1 motif") : `${g.folders.length} ${g.folders.length > 1 ? tr("URL rules", "règles d'URL") : tr("URL rule", "règle d'URL")}`}</td><td>${rl(g.role)}</td><td style="font-size:13px">${segRule(g)}</td></tr>` +
+    g.folders.map(u => `<tr><td></td><td class="n">${u.pages}</td><td><code>${fshow(u)}</code> <span class="kw">(${u.now === "(none)" ? tr("no group", "aucun groupe") : `${tr("today", "aujourd'hui")}${FR ? " : " : ": "}${esc(u.now)}`})</span></td><td></td><td></td></tr>`).join("")).join("")
+    || `<tr><td colspan="5" class="kw">${tr("Nothing to add or fix: every crawled page sits in its template.", "Rien à ajouter ni à corriger : chaque page crawlée est dans son gabarit.")}</td></tr>`;
+  const hasPag = segGroups.some(g => g.role === "pagination");
+  document.getElementById("segleaks").innerHTML = tr(
+    `${hasPag ? "<b>Order matters.</b> Rules are evaluated top down. Put the pagination group first, otherwise the folder rules catch its pages. " : ""}One group, one combined rule. After the fix, rerun the Lens: only legacy URLs (404 or redirects) should remain in the "No group" row.`,
+    `${hasPag ? "<b>L'ordre compte.</b> Les règles sont évaluées de haut en bas. Placez le groupe de pagination en premier, sinon les règles de dossier attrapent ses pages. " : ""}Un groupe, une règle combinée. Après correction, relancez la Lens : seules les anciennes URL (404 ou redirections) doivent rester dans la ligne « Aucun groupe ».`);
+  const olds = [...new Set(D.crosstab.map(r => r[0]))].sort((a, b) => a === "(none)" ? 1 : b === "(none)" ? -1 : a.localeCompare(b));
+  const news = D.order.filter(g => D.crosstab.some(r => r[1] === g));
+  const cell = (o, n) => D.crosstab.filter(r => r[0] === o && r[1] === n).reduce((s, r) => s + r[2], 0);
+  const cmax = D.crosstab.reduce((a, r) => Math.max(a, r[2]), 1);
+  document.getElementById("ct").innerHTML = `<thead><tr><th>${tr(`Current "${esc(META.seg)}" ↓ / audit group →`, `« ${esc(META.seg)} » actuel ↓ / groupe de l'audit →`)}</th>${news.map(n => `<th class="n">${gn(n)}</th>`).join("")}</tr></thead><tbody>` +
+    olds.map(o => `<tr><td><b>${o === "(none)" ? tr("No group", "Aucun groupe") : esc(o)}</b></td>${news.map(n => { const v = cell(o, n);
+      const bad = o === "(none)" && v > 0; return `<td style="background:${v ? (bad ? `rgba(220,38,38,${0.1 + 0.5 * v / cmax})` : `rgba(47,111,237,${0.06 + 0.5 * v / cmax})`) : "transparent"}">${v || ""}</td>`; }).join("")}</tr>`).join("") + "</tbody>";
+  const noneTop = Object.entries(D.crosstab.filter(r => r[0] === "(none)").reduce((m, r) => (m[r[1]] = (m[r[1]] || 0) + r[2], m), dict())).sort((a, b) => b[1] - a[1]), noneTot = noneTop.reduce((a, [, n]) => a + n, 0);
+  document.getElementById("ctread").innerHTML = tr(
+    `<b>How to read it.</b> Each row is a group of the current segmentation, each column a group rebuilt by this audit from its URL rules. The red row lists the <b>${noneTot}</b> crawled pages with no group${noneTop.length ? `, mostly ${gn(noneTop[0][0])} (${noneTop[0][1]})` : ""}. Blue cells off the diagonal are pages sorted into the wrong template.`,
+    `<b>Comment le lire.</b> Chaque ligne est un groupe de la segmentation actuelle, chaque colonne un groupe reconstruit par cet audit à partir de ses règles d'URL. La ligne rouge liste les <b>${noneTot}</b> pages crawlées sans groupe${noneTop.length ? `, surtout ${gn(noneTop[0][0])} (${noneTop[0][1]})` : ""}. Les cases bleues hors diagonale sont des pages rangées dans le mauvais gabarit.`);
+
+  // ================= TAB 1.2 zoning =================
+  if (!Z) { missing("zonmissing", ...NEEDS_CODE); document.getElementById("zonbody").hidden = true; }
+  else {
+    const ZC = Object.fromEntries(Z.checks.map(c => [c.key, c])), mainTot = Z.positions.main || 0, FC = Z.footer_comp || {}, TT = Z.template_top || [];
+    const cats = TT.filter(t => t.role === "hub" || t.role === "taxonomy"), others = TT.filter(t => t.role !== "hub" && t.role !== "taxonomy");
+    const blocks = [...others.slice(0, 4).map(t => tr(`"${esc(t.anchor)}" on ${full(t.pages)} pages`, `« ${esc(t.anchor)} » sur ${full(t.pages)} pages`)),
+      ...(cats.length ? [tr(`a category or tag bar on ${full(cats[0].pages)} pages`, `une barre de catégories ou de tags sur ${full(cats[0].pages)} pages`)] : [])].join(tr(" and ", " et "));
+    document.getElementById("zonscore").innerHTML = scoreCard(tr("Zoning score", "Score de zoning"), Z.score, Z.optimized, tr(
+      `The main zone holds <b>${full(mainTot)} links</b>. ${full(ZC.menu_main.value)} of them (${pct(ZC.menu_main.share * 100)}) are ${T("menu", "blocks repeated")} on ${D.settings.template_min} pages or more${blocks ? `: ${blocks}` : ""}. Taxonomy links (tags, authors) in the main zone: ${full(ZC.tag_main.value)}. Real ${T("editorial", "in-text links")}: ${full(D.kinds.editorial)}. The footer carries ${pct(ZC.footer.value * 100)} of all ${T("follow", "followed links")}${FC.related || FC.tags ? `, including ${full(FC.related || 0)} links to content pages and ${full(FC.tags || 0)} taxonomy links that this crawl's zoning puts there` : ""}. ${pct(Z.ed_share * 100)} of content pages carry at least one outgoing in-text link.`,
+      `La zone principale porte <b>${full(mainTot)} liens</b>. ${full(ZC.menu_main.value)} d'entre eux (${pct(ZC.menu_main.share * 100)}) sont des ${T("menu", "blocs répétés")} sur ${D.settings.template_min} pages ou plus${blocks ? ` : ${blocks}` : ""}. Liens de taxonomie (tags, auteurs) dans la zone principale : ${full(ZC.tag_main.value)}. Vrais ${T("editorial", "liens éditoriaux")} : ${full(D.kinds.editorial)}. Le footer porte ${pct(ZC.footer.value * 100)} de tous les ${T("follow", "liens suivis")}${FC.related || FC.tags ? `, dont ${full(FC.related || 0)} liens vers des pages de contenu et ${full(FC.tags || 0)} liens de taxonomie que le zoning de ce crawl y range` : ""}. ${pct(Z.ed_share * 100)} des pages de contenu portent au moins un lien éditorial sortant.`));
+    document.getElementById("zonchecks").innerHTML = checkTable([
+      [tr(`Share of the main zone's links that are blocks repeated on ${D.settings.template_min} pages or more`, `Part des liens de la zone principale qui sont des blocs répétés sur ${D.settings.template_min} pages ou plus`), `${full(ZC.menu_main.value)} / ${full(mainTot)} (${pct(ZC.menu_main.share * 100)})`, ZC.menu_main.pts, ZC.menu_main.max,
+        ZC.menu_main.value ? tr("Take the repeated blocks out of <code>&lt;main&gt;</code>: menus and category bars into <code>&lt;nav&gt;</code>, CTAs into <code>&lt;aside&gt;</code>. 0 is the target.", "Sortez les blocs répétés de <code>&lt;main&gt;</code> : menus et barres de catégories dans <code>&lt;nav&gt;</code>, CTA dans <code>&lt;aside&gt;</code>. La cible est 0.") : tr("Nothing to fix.", "Rien à corriger.")],
+      [tr("Taxonomy links (tags, authors) inside the main zone, relative to real in-text links", "Liens de taxonomie (tags, auteurs) dans la zone principale, rapportés aux vrais liens éditoriaux"), `${full(ZC.tag_main.value)} ${tr("for", "pour")} ${full(D.kinds.editorial)} (${pct(ZC.tag_main.share * 100)})`, ZC.tag_main.pts, ZC.tag_main.max,
+        !ZC.tag_main.value ? tr("Nothing to fix.", "Rien à corriger.") : tr("Wrap them in <code>&lt;aside&gt;</code> or in the article <code>&lt;footer&gt;</code>.", "Enveloppez-les dans <code>&lt;aside&gt;</code> ou dans le <code>&lt;footer&gt;</code> de l'article.")],
+      [tr("Share of all followed links sitting in the footer (full points at 15 % or less, none at 50 %: audit convention)", "Part de tous les liens suivis situés dans le footer (tous les points à 15 % ou moins, aucun à 50 % : convention de cet audit)"), pct(ZC.footer.value * 100), ZC.footer.pts, ZC.footer.max,
+        tr("Keep the footer, cut it to the entries people use.", "Gardez le footer, réduisez-le aux entrées réellement utilisées.")],
+    ]);
+    const ZX = Object.fromEntries(Z.examples.map(e => [e.key, e]));
+    const zrows = [
+      [tr(`Blocks repeated in the main zone${blocks ? `: ${blocks}` : ""}`, `Blocs répétés dans la zone principale${blocks ? ` : ${blocks}` : ""}`), ZX.menu.links, ZX.menu.pages, "main", tr("Menus and category bars in <code>&lt;nav&gt;</code>, CTA in <code>&lt;aside&gt;</code>", "Menus et barres de catégories dans <code>&lt;nav&gt;</code>, CTA dans <code>&lt;aside&gt;</code>")],
+      [tr("Taxonomy links (tags, authors) in the main zone", "Liens de taxonomie (tags, auteurs) dans la zone principale"), ZX.tags.links, ZX.tags.pages, "main", "<code>&lt;aside&gt;</code>"],
+      [tr("Related content in the footer zone", "Contenus liés dans la zone footer"), FC.related, null, "footer", "<code>&lt;aside&gt;</code>"],
+      [tr(`Site footer: ${pct(ZX.footer.share * 100)} of all followed links`, `Footer du site : ${pct(ZX.footer.share * 100)} de tous les liens suivis`), FC.site ?? ZX.footer.links, ZX.footer.pages, "footer", tr("Stays in <code>&lt;footer&gt;</code>, trimmed to the useful entries", "Reste dans <code>&lt;footer&gt;</code>, réduit aux entrées utiles")],
+      [tr('Generic CTA ("Learn more") towards money pages', "CTA générique (« En savoir plus ») vers les pages business"), ZX.cta.links, ZX.cta.pages, tr("main (counted as in-text)", "main (compté comme éditorial)"), tr("Inside <code>&lt;aside class=&quot;cta&quot;&gt;</code>, with the offer named in the anchor", "Dans <code>&lt;aside class=&quot;cta&quot;&gt;</code>, avec l'offre nommée dans l'ancre")],
+    ].filter(r => r[1]);
+    document.querySelector("#zonex tbody").innerHTML = zrows.map(([b, links, pg, now, to]) => `<tr><td>${b}</td><td class="n">${full(links)}</td><td class="n">${pg == null ? "–" : full(pg)}</td><td>${now}</td><td style="font-size:13.5px">${to}</td></tr>`).join("");
+    document.getElementById("zonread").innerHTML = tr(
+      `<b>Why it matters.</b> Google and the AI crawlers also use these tags to find the main content. The ${T("menu", "repeated blocks")} are detected here as any target + anchor pair repeated on ${D.settings.template_min} pages or more; everything else in the main zone is counted as in-text unless it comes from a ${T("listing", "listing page")} or points to a taxonomy page. Check one page's HTML by hand before changing the templates: the zoning rules of the crawl and the live HTML can disagree.`,
+      `<b>Pourquoi c'est important.</b> Google et les crawlers IA utilisent aussi ces balises pour trouver le contenu principal. Les ${T("menu", "blocs répétés")} sont détectés ici comme toute paire cible + ancre répétée sur ${D.settings.template_min} pages ou plus ; tout le reste de la zone principale est compté comme éditorial, sauf s'il vient d'une ${T("listing", "page de liste")} ou pointe vers une page de taxonomie. Vérifiez le HTML d'une page à la main avant de toucher aux gabarits : les règles de zoning du crawl et le HTML en ligne peuvent diverger.`);
+  }
+
+  // ================= TAB 2.3 demand vs equity =================
+  const bub = D.groups.filter(g => g.live > 0).sort((x, y) => y.gap - x.gap);
+  Highcharts.chart("bubble", {
+    chart: {type: "bar"}, xAxis: {categories: bub.map(g => gn(g.name))},
+    yAxis: {title: {text: tr("% of site total", "% du total du site")}, max: 100},
+    tooltip: {shared: true, useHTML: true, formatter() { const g = bub[this.points[0].point.index];
+      return tr(`<b>${gn(g.name)}</b><br>${g.pages} pages (${g.live} indexable, ${g.orphans} orphan)<br>Google impressions: ${fmt(g.imp)} (${pct(g.imp_share)})<br>SEO visits: ${pct(g.visit_share)}<br>Summed Inrank: ${pct(g.inrank_share)}<br>Average Inrank per indexable page: <b>${d1(g.avg_inrank)} / 10</b>`,
+        `<b>${gn(g.name)}</b><br>${g.pages} pages (${g.live} indexables, ${g.orphans} orphelines)<br>Impressions Google : ${fmt(g.imp)} (${pct(g.imp_share)})<br>Visites SEO : ${pct(g.visit_share)}<br>Inrank cumulé : ${pct(g.inrank_share)}<br>Inrank moyen par page indexable : <b>${d1(g.avg_inrank)} / 10</b>`); }},
+    plotOptions: {series: {cursor: "pointer", groupPadding: .12, dataLabels: {enabled: true, format: FR ? "{y:.1f} %" : "{y:.1f}%", style: {fontSize: "11px", fontWeight: "500"}},
+      point: {events: {click() { setFilter({group: bub[this.index].name}); }}}}},
+    series: [{name: tr("Share of Google impressions", "Part des impressions Google"), data: bub.map(g => g.imp_share), color: "#2f6fed"},
+             {name: tr("Share of SEO visits", "Part des visites SEO"), data: bub.map(g => g.visit_share), color: "#93c5fd"},
+             {name: tr("Share of summed Inrank (indicative)", "Part de l'Inrank cumulé (indicatif)"), data: bub.map(g => g.inrank_share), color: "#f59e0b"}],
+  });
+  const TP = D.topics.filter(t => t.live > 0), tImp = TP.reduce((s, t) => s + t.imp, 0) || 1, tInr = TP.reduce((s, t) => s + t.inrank, 0) || 1;
+  Highcharts.chart("topics", {
+    chart: {type: "column"}, xAxis: {categories: TP.map(t => esc(t.name))},
+    yAxis: [{title: {text: tr("% of content total", "% du total des contenus")}}, {title: {text: tr("Content pages with no in-text link", "Contenus sans lien éditorial")}, opposite: true}],
+    tooltip: {shared: true, valueDecimals: 1},
+    plotOptions: {series: {cursor: "pointer", point: {events: {click() { setFilter({topic: TP[this.index].name}); }}}}},
+    series: [{name: tr("Share of content impressions", "Part des impressions des contenus"), data: TP.map(t => t.imp / tImp * 100), color: "#2f6fed", tooltip: {valueSuffix: FR ? " %" : "%"}},
+      {name: tr("Share of content Inrank", "Part de l'Inrank des contenus"), data: TP.map(t => t.inrank / tInr * 100), color: "#c7d2fe", tooltip: {valueSuffix: FR ? " %" : "%"}},
+      ...(AV.links ? [{name: tr("Indexable content pages with no in-text link", "Contenus indexables sans lien éditorial"), type: "line", yAxis: 1, data: TP.map(t => t.no_ed), color: "#dc2626", tooltip: {valueDecimals: 0}}] : [])],
+  });
+
+  const st = {group: "", topic: "", prio: "", q: "", zero: false, sort: "sd", dir: -1, n: 50};
+  const tg = document.getElementById("tg"), tt = document.getElementById("tt");
+  [...new Set(D.targets.map(r => r.group))].forEach(g => tg.add(new Option(g, g)));
+  [...new Set(D.targets.map(r => r.topic).filter(Boolean))].sort().forEach(t => tt.add(new Option(t, t)));
+  const setFilter = f => { Object.assign(st, {group: "", topic: ""}, f, {n: 50}); tg.value = st.group; tt.value = st.topic; renderTargets(); document.getElementById("targetsCard").scrollIntoView({behavior: "smooth", block: "start"}); };
+  const gainCell = g => g != null && g > 0.5 ? `<span class="pill p-ok">+${nf(g)}${FR ? " %" : "%"}</span>` : "–";
+  function renderTargets() {
+    const q = st.q.toLowerCase();
+    const rows = D.targets.filter(r => (!st.group || r.group === st.group) && (!st.topic || r.topic === st.topic) && (!st.prio || r.prio === st.prio)
+      && (!st.zero || r.ed_src === 0) && (!q || r.path.toLowerCase().includes(q) || r.top_kw.join(" ").toLowerCase().includes(q)));
+    const PR = {"High": 2, "Medium": 1, "Low": 0}, key = r => st.sort === "prio" ? PR[r.prio] : r[st.sort];
+    rows.sort((a, b) => { const x = key(a), y = key(b); if (x == null || y == null) return x == null ? (y == null ? 0 : 1) : -1; return (x > y ? 1 : x < y ? -1 : 0) * st.dir; });
+    document.getElementById("tcount").textContent = rows.length + " pages";
+    document.querySelector("#tt_tbl tbody").innerHTML = rows.slice(0, st.n).map(r => `<tr>
+      <td><a href="${safeUrl(r.url)}" target="_blank" rel="noopener" title="${esc(r.title)}">${esc(r.path)}</a><div class="kw">${gn(r.group)}${r.topic ? " · " + esc(r.topic) : ""}${r.live ? "" : tr(" · not indexable", " · non indexable")}</div></td>
+      <td><span class="pill ${PCLS[r.prio]}">${PL[r.prio]}</span></td><td class="n">${fmt(r.sd)}</td><td class="n">${r.pos == null ? "–" : nf(r.pos)}</td>
+      <td class="n">${r.ed_src ?? "–"}</td><td class="n">${d1(r.inrank)}</td><td class="n">${gainCell(r.gain)}${r.new_links ? `<div class="kw">${r.new_links} ${r.new_links > 1 ? tr("new links", "nouveaux liens") : tr("new link", "nouveau lien")}</div>` : ""}</td><td class="n">${r.depth ?? "–"}</td>
+      <td>${r.kw_in_anchor === true ? `<span class="pill p-ok">${tr("Yes", "Oui")}</span>` : r.kw_in_anchor === false ? `<span class="pill p-high">${tr("No", "Non")}</span>` : "–"}</td>
+      <td class="kw">${esc(r.top_kw.join(", "))}</td></tr>`).join("");
+    document.getElementById("tmore").style.display = rows.length > st.n ? "" : "none";
+  }
+  tg.onchange = e => { st.group = e.target.value; st.n = 50; renderTargets(); };
+  tt.onchange = e => { st.topic = e.target.value; st.n = 50; renderTargets(); };
+  document.getElementById("tp").onchange = e => { st.prio = e.target.value; st.n = 50; renderTargets(); };
+  document.getElementById("tq").oninput = e => { st.q = e.target.value; st.n = 50; renderTargets(); };
+  document.getElementById("tz").onchange = e => { st.zero = e.target.checked; st.n = 50; renderTargets(); };
+  document.getElementById("tmore").onclick = () => { st.n += 50; renderTargets(); };
+  document.querySelectorAll("#tt_tbl th[data-k]").forEach(th => th.onclick = () => { const k = th.dataset.k; st.dir = st.sort === k ? -st.dir : -1; st.sort = k; renderTargets(); });
+  renderTargets();
+  document.getElementById("prioread").innerHTML = tr(`<b>Priority.</b> ${TERMS.prio[0].replace(/^Priority: /, "")} Orphan pages have their own report in section 4.`, `<b>Priorité.</b> ${TERMS.prio[1].replace(/^Priorité : /, "")} Les pages orphelines ont leur propre rapport, section 4.`);
+
+  function pager(tbl, more, count, filt, rowHtml, step, unit) {
+    let n = step;
+    const draw = () => { const rows = filt(); count.textContent = rows.length.toLocaleString(LOC) + " " + unit;
+      tbl.querySelector("tbody").innerHTML = rows.slice(0, n).map(rowHtml).join(""); more.style.display = rows.length > n ? "" : "none"; applyTips(); };
+    more.onclick = () => { n += step; draw(); };
+    return {render: draw, reset() { n = step; draw(); }};
+  }
+  function csv(name, header, rows) {
+    const cellv = v => { let t = String(v ?? ""); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return `"${t.replace(/"/g, '""')}"`; };   // no spreadsheet formulas
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + [header, ...rows].map(r => r.map(cellv).join(",")).join("\n")], {type: "text/csv;charset=utf-8"})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ================= TAB 2.4 orphans =================
+  const VERD = {
+    relink: [tr("Link it", "À mailler"), "p-high", tr("answers 200 and still gets demand", "répond 200 et reçoit encore de la demande")],
+    lost: [tr("Redirect (404 with demand)", "Rediriger (404 avec demande)"), "p-med", tr("gone, but Google still shows it", "disparue, mais Google l'affiche encore")],
+    leave: [tr("200, no demand: keep, or retire if thin", "200 sans demande : garder, ou retirer si pauvre"), "p-low", tr("reachable, nobody asks for it", "accessible, personne ne la cherche")],
+    redirected: [tr("Already redirected (301)", "Déjà redirigée (301)"), "p-acc", tr("fine, check the target answers 200", "bien, vérifiez que la cible répond 200")],
+    temp: [tr("Temporary redirect: make it a 301", "Redirection temporaire : passez en 301"), "p-med", tr("302 or 307 keeps the old URL in the index", "302 ou 307 garde l'ancienne URL dans l'index")],
+    dead: [tr("Dead, nothing to do", "Morte, rien à faire"), "p-low", tr("404 or 410 without demand", "404 ou 410 sans demande")],
+    check: [tr("Check by hand", "À vérifier à la main"), "p-med", tr("status not checked, blocked or no answer", "statut non vérifié, bloquée ou sans réponse")],
+    param: [tr("Parameter variant: check the canonical", "Variante avec paramètre : vérifier la canonical"), "p-med", ""],
+  };
+  const OSUM = D.orphan_summary, VORD = ["relink", "lost", "temp", "leave", "redirected", "dead", "check", "param"].filter(v => OSUM[v] && OSUM[v].n);
+  document.getElementById("otiles").innerHTML = VORD.map(v => `<button type="button" class="card kpi otile" data-v="${v}" aria-pressed="false"><span class="v">${OSUM[v].n}</span><span class="d"><span class="pill ${VERD[v][1]}">${VERD[v][0]}</span><br>${fmt(OSUM[v].imp)} ${tr("impressions", "impressions")}${VERD[v][2] ? " · " + VERD[v][2] : ""}</span></button>`).join("")
+    || `<div class="card kw">${tr("No orphan page with a Google signal in this crawl.", "Aucune page orpheline avec un signal Google dans ce crawl.")}</div>`;
+  const ov = document.getElementById("ov"), og = document.getElementById("og");
+  VORD.forEach(v => ov.add(new Option(VERD[v][0], v)));
+  [...new Set(D.orphans.map(o => o.group))].forEach(g => og.add(new Option(g, g)));
+  const statusPill = s => s == null ? `<span class="pill p-low">?</span>` : `<span class="pill ${s === 200 ? "p-ok" : s < 400 ? "p-acc" : "p-high"}">${esc(s)}</span>`;
+  const OT = pager(document.getElementById("otbl"), document.getElementById("omore"), document.getElementById("ocount"),
+    () => { const q = document.getElementById("oq").value.toLowerCase(); return D.orphans.filter(o => (!ov.value || o.verdict === ov.value) && (!og.value || o.group === og.value) && (!q || o.path.toLowerCase().includes(q))); },
+    o => `<tr><td><a href="${safeUrl(o.url)}" target="_blank" rel="noopener">${esc(o.path)}</a><div class="kw">${gn(o.group)}${o.topic ? " · " + esc(o.topic) : ""}</div></td><td><span class="pill ${VERD[o.verdict][1]}">${VERD[o.verdict][0]}</span></td>
+      <td>${statusPill(o.status)}</td><td class="n">${full(o.imp)}</td><td class="n">${full(o.visits)}</td><td class="n">${full(o.bot)}</td>
+      <td class="kw">${o.location ? `${sp(o.location)}${o.loc_status ? ` <span class="pill ${o.loc_status === 200 ? "p-ok" : "p-med"}">${esc(o.loc_status)}</span>` : ""}` : ""}</td></tr>`, 100, "URL");
+  const syncTiles = () => document.querySelectorAll(".otile").forEach(b => { const on = b.dataset.v === ov.value; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+  document.querySelectorAll(".otile").forEach(b => b.onclick = () => { ov.value = ov.value === b.dataset.v ? "" : b.dataset.v; syncTiles(); OT.reset(); });
+  ["oq", "ov", "og"].forEach(id => document.getElementById(id).addEventListener("input", OT.reset));
+  ov.addEventListener("input", syncTiles);
+  OT.render(); syncTiles();
+  const relinkByGroup = D.orphans.filter(o => o.verdict === "relink").reduce((m, o) => (m[o.group] = (m[o.group] || 0) + 1, m), dict());
+  document.getElementById("oread").innerHTML = D.orphan_checked ? tr(
+    `<b>Reading.</b> ${D.orphan_checked} of the ${D.orphans.length} orphan URLs were checked live. ${OSUM.relink?.n ? `<b>${OSUM.relink.n}</b> deserve a link (${Object.entries(relinkByGroup).map(([g, n]) => `${gn(g)} ${n}`).join(", ")}): add them to their topic hub or to a related page.` : "None of them needs a link."} ${OSUM.redirected?.n || 0} already redirect with a 301 and still carry ${fmt(OSUM.redirected?.imp || 0)} impressions: that demand follows the redirect as long as the target answers 200. ${OSUM.leave?.n || 0} answer 200 without demand: keep them, or answer 410 if they are thin. ${OSUM.dead?.n || 0} are dead without demand: nothing to do.${OSUM.lost?.n ? ` The ${OSUM.lost.n} 404 with demand (${fmt(OSUM.lost.imp)} impressions) need a redirect to the closest indexable page.` : ""} "Demand" means at least 100 impressions or 1 click.`,
+    `<b>Lecture.</b> ${D.orphan_checked} des ${D.orphans.length} URL orphelines ont été vérifiées en direct. ${OSUM.relink?.n ? `<b>${OSUM.relink.n}</b> méritent un lien (${Object.entries(relinkByGroup).map(([g, n]) => `${gn(g)} ${n}`).join(", ")}) : ajoutez-les à leur page pilier ou à une page proche.` : "Aucune ne mérite de lien."} ${OSUM.redirected?.n || 0} redirigent déjà en 301 et portent encore ${fmt(OSUM.redirected?.imp || 0)} impressions : cette demande suit la redirection tant que la cible répond 200. ${OSUM.leave?.n || 0} répondent 200 sans demande : gardez-les, ou répondez 410 si elles sont pauvres. ${OSUM.dead?.n || 0} sont mortes sans demande : rien à faire.${OSUM.lost?.n ? ` Les ${OSUM.lost.n} 404 avec demande (${fmt(OSUM.lost.imp)} impressions) demandent une redirection vers la page indexable la plus proche.` : ""} « Demande » = au moins 100 impressions ou 1 clic.`)
+    : tr(`<b>Reading.</b> The HTTP status of the ${D.orphans.length} orphan URLs was not checked, so every verdict says "check by hand". From Claude Code, the agent can check them (tools/check_orphans.py) and rebuild the report.`,
+      `<b>Lecture.</b> Le statut HTTP des ${D.orphans.length} URL orphelines n'a pas été vérifié : chaque verdict dit donc « à vérifier à la main ». Depuis Claude Code, l'agent peut les vérifier (tools/check_orphans.py) et reconstruire le rapport.`);
+
+  // ================= TAB 2.5 top five strategies =================
+  const ORD = ["hub", "peer", "product", "listing", "prod2art"].sort((a, b) => S[b].scope.sd - S[a].scope.sd), NUM = k => ORD.indexOf(k) + 1;
+  const BS = SIM ? SIM.by_strategy : null, pctg = v => v == null ? "–" : `${v >= 0 ? "+" : ""}${nf(v)}${FR ? " %" : "%"}`;
+  const ACT = [
+    ["hub", tr("Turn the hub pages into real topic hubs", "Faites des pages piliers de vraies portes d'entrée thématiques"),
+     tr(`The ${S.hub.hubs} hub pages (${roleNames("hub")}) hold an average Inrank of <b>${d1(RS.hub.avg_inrank)} / 10</b>. On the ${S.hub.topic_hubs} hubs that match a content topic, add a short intro and a curated "Start here" block linking up to 10 of the best pages of the topic by ${T("sd", "impressions at positions 4 to 20")} (<b>${S.hub.receivers} pages</b>, ${fmt(S.hub.imp)} such impressions).${S.hub.deep ? ` ${S.hub.deep} content pages sit at depth 5 or more: see strategy ${NUM("listing")}.` : ""}`,
+        `Les ${S.hub.hubs} pages piliers (${roleNames("hub")}) détiennent un Inrank moyen de <b>${d1(RS.hub.avg_inrank)} / 10</b>. Sur les ${S.hub.topic_hubs} piliers qui correspondent à une thématique de contenu, ajoutez une courte intro et un bloc « Commencer ici » sélectionné, qui pointe vers jusqu'à 10 des meilleures pages de la thématique par ${T("sd", "impressions en positions 4 à 20")} (<b>${S.hub.receivers} pages</b>, ${fmt(S.hub.imp)} impressions de ce type).${S.hub.deep ? ` ${S.hub.deep} pages de contenu sont à la profondeur 5 ou plus : voir la stratégie ${NUM("listing")}.` : ""}`)],
+    ["peer", tr("Link the high-priority content pages from pages of the same topic that already rank", "Liez les contenus prioritaires depuis des contenus de la même thématique qui se positionnent déjà"),
+     tr(`<b>${S.peer.pages} high-priority content pages</b> hold <b>${fmt(S.peer.imp)}</b> impressions at positions 4 to 20${AV.links ? " with 3 in-text links or fewer" : ""}, and ${S.peer.medium} more are medium priority. Give 5 links to each high and 3 to each medium one, from the same-topic pages with the highest Inrank that do not link to them yet (${D.settings.sender_cap} new links per sender at most), with one of the target's top 3 queries as anchor: <b>${S.peer.links} links</b> in all, listed page by page in tab 3.`,
+        `<b>${S.peer.pages} contenus en priorité haute</b> cumulent <b>${fmt(S.peer.imp)}</b> impressions en positions 4 à 20${AV.links ? " avec 3 liens éditoriaux ou moins" : ""}, et ${S.peer.medium} autres sont en priorité moyenne. Donnez 5 liens à chaque contenu haute et 3 à chaque moyenne, depuis les contenus de la même thématique au plus fort Inrank qui ne les lient pas encore (${D.settings.sender_cap} nouveaux liens par page émettrice au plus), avec l'une des 3 premières requêtes de la cible comme ancre : <b>${S.peer.links} liens</b> en tout, listés page par page dans l'onglet 3.`)],
+    ["product", tr("Name the offer in the content pages that rank", "Nommez l'offre dans les contenus qui se positionnent"),
+     S.product.mapped ? tr(`Content pages send ${full(S.product.total)} in-text links, <b>${full(S.product.current)}</b> of them to money pages (${roleNames("money")}). Add an in-text link whose anchor names the offer, from the <b>${S.product.pages} content pages</b> with at least ${full(D.settings.med_sd)} ${T("sd", "impressions at positions 4 to 20")} on a topic mapped to a money page.${S.product.case_pages ? ` The ${S.product.case_pages} proof pages get ${full(S.product.cases)} in-text links: name the customer and the result in those anchors.` : ""} Not simulated: menus often link the money pages already, the gain is the anchor and the click.`,
+        `Les contenus envoient ${full(S.product.total)} liens éditoriaux, dont <b>${full(S.product.current)}</b> vers les pages business (${roleNames("money")}). Ajoutez un lien dans le texte dont l'ancre nomme l'offre, depuis les <b>${S.product.pages} contenus</b> à au moins ${full(D.settings.med_sd)} ${T("sd", "impressions en positions 4 à 20")} sur une thématique reliée à une page business.${S.product.case_pages ? ` Les ${S.product.case_pages} pages de preuve reçoivent ${full(S.product.cases)} liens éditoriaux : nommez le client et le résultat dans ces ancres.` : ""} Non simulé : les menus lient souvent déjà les pages business, le gain est l'ancre et le clic.`)
+       : tr(`Content pages send ${full(S.product.total)} in-text links, ${full(S.product.current)} of them to money pages. No topic is mapped to a money page in raw.json (<code>topic_money</code>), so no named link is proposed: ask your agent to map them.`, `Les contenus envoient ${full(S.product.total)} liens éditoriaux, dont ${full(S.product.current)} vers les pages business. Aucune thématique n'est reliée à une page business dans raw.json (<code>topic_money</code>) : aucun lien nommé n'est proposé, demandez à votre agent de les relier.`)],
+    ["listing", tr("Make the listings shorter in clicks", "Raccourcissez les listes en clics"),
+     tr(`<b>${S.listing.deep} content pages</b> sit at depth 5 or more (${fmt(S.listing.deep_imp)} impressions at positions 4 to 20)${S.listing.pagination ? `, behind <b>${S.listing.pagination} pagination pages</b>` : ""}. One template change fixes it for all of them: list 30 to 50 items per page, or split each listing into sub-hubs by sub-topic.${S.listing.hubbed ? ` The hub block of strategy ${NUM("hub")} only lifts ${S.listing.hubbed} of them.` : ""}`,
+        `<b>${S.listing.deep} pages de contenu</b> sont à la profondeur 5 ou plus (${fmt(S.listing.deep_imp)} impressions en positions 4 à 20)${S.listing.pagination ? `, derrière <b>${S.listing.pagination} pages de pagination</b>` : ""}. Un seul changement de gabarit règle le problème pour toutes : listez 30 à 50 éléments par page, ou découpez chaque liste en sous-piliers par sous-thème.${S.listing.hubbed ? ` Le bloc pilier de la stratégie ${NUM("hub")} n'en remonte que ${S.listing.hubbed}.` : ""}`)],
+    ["prod2art", tr("Make the money pages give back", "Faites rendre la popularité aux pages business"),
+     tr(`The ${S.prod2art.pages} money pages hold an average Inrank of <b>${d1(S.prod2art.inrank)} / 10</b> but send only <b>${full(S.prod2art.current)}</b> in-text links to content pages.${S.prod2art.mapped ? ` Add a block of 3 to 5 ${T("sd", "striking-distance")} content pages of the matching topic on each of the ${S.prod2art.mapped} money pages mapped to a topic.` : " Map the topics to money pages to get the list."}`,
+        `Les ${S.prod2art.pages} pages business détiennent un Inrank moyen de <b>${d1(S.prod2art.inrank)} / 10</b> mais n'envoient que <b>${full(S.prod2art.current)}</b> liens éditoriaux vers les contenus.${S.prod2art.mapped ? ` Ajoutez un bloc de 3 à 5 contenus en positions 4 à 20 de la thématique correspondante sur chacune des ${S.prod2art.mapped} pages business reliées à une thématique.` : " Reliez les thématiques aux pages business pour obtenir la liste."}`)],
+  ];
+  const SCOPE = {hub: tr("content pages placed in a hub block", "contenus placés dans un bloc pilier"), peer: tr("content pages that receive same-topic links", "contenus qui reçoivent des liens de leur thématique"),
+    product: tr("money pages named from content pages", "pages business nommées depuis des contenus"), listing: tr("content pages at depth 5 or more", "contenus à la profondeur 5 ou plus"), prod2art: tr("content pages listed on money pages", "contenus listés sur les pages business")};
+  const scopeStrip = k => { const sc = S[k].scope, fig = (v, d) => `<div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+    return `<div class="scope">${fig(full(sc.pages), `${tr("pages impacted", "pages impactées")}${FR ? " : " : ": "}${SCOPE[k]}`)}${fig(fmt(sc.sd), tr("impressions at positions 4 to 20 at stake", "impressions en positions 4 à 20 en jeu"))}${fig(S[k].simulated && BS ? pctg(BS[k].median_gain) : "–", S[k].simulated ? tr("median simulated PageRank gain", "gain de PageRank simulé médian") : tr("not simulated", "non simulé"))}</div>`; };
+  document.getElementById("actions").innerHTML = ACT.sort((a, b) => NUM(a[0]) - NUM(b[0])).map(([k, h, p], i) => `<div class="card action"><div class="num">${i + 1}</div><div><h3>${h}${S[k].simulated ? ` <span class="pill p-acc">${tr("simulated", "simulée")}</span>` : ""}</h3>${scopeStrip(k)}<p>${p}</p>
+    <div class="meta"><span>${tr("Data Explorer filter", "Filtre Data Explorer")}${FR ? " : " : ": "}<code>${esc(S[k].filter)}</code></span></div></div></div>`).join("");
+
+  // ================= TAB 2.6 links to add + before/after =================
+  const SL = {hub: tr("Hub blocks", "Blocs piliers"), peer: tr("Same-topic pages", "Contenus de la même thématique"), product: tr("Named offer link", "Lien d'offre nommé")};
+  if (!SIM) { missing("simmissing", ...NEEDS_CODE); document.getElementById("simbody").hidden = true; }
+  else {
+    const ACTS = ["hub", "peer", "product"];
+    document.getElementById("simintro").innerHTML = tr(`<b>${full(SIM.proposals)} links to add towards ${full(SIM.receivers)} pages</b>, in ${ACTS.length} actions.`, `<b>${full(SIM.proposals)} liens à ajouter vers ${full(SIM.receivers)} pages</b>, répartis en ${ACTS.length} actions.`);
+    document.getElementById("simtiles").innerHTML = ACTS.map(k => `<div class="card kpi"><div class="d" style="font-weight:600;color:var(--ink);font-size:14px">${SL[k]}</div>
+      <div class="v">${full(BS[k].links)} <small style="font-size:14px;font-weight:500;color:var(--muted)">${tr("links", "liens")}</small></div>
+      <div class="d">${tr(`towards ${BS[k].receivers} pages`, `vers ${BS[k].receivers} pages`)} · ${S[k].simulated ? `<b>${pctg(BS[k].median_gain)}</b> ${tr("median gain", "gain médian")}` : tr("not simulated", "non simulé")}</div></div>`).join("");
+    const isPath = v => String(v).startsWith("/");
+    const side = (g, v, n) => isPath(v) ? `<code>${esc(v)}</code>` : `${gn(g)} · ${esc(v)} <span class="kw">(${n} ${tr("pages", "pages")})</span>`;
+    const where = h => h === "hub" ? tr('"Start here" block of the hub', "Bloc « Commencer ici » de la page pilier") : tr("In the text, first paragraphs", "Dans le texte, premiers paragraphes");
+    document.getElementById("matrix").innerHTML = `<thead><tr><th>${tr("From", "Depuis")}</th><th>${tr("Where to place the link", "Où placer le lien")}</th><th class="n">${tr("Links", "Liens")}</th><th>${tr("→ To", "→ Vers")}</th><th class="n">${tr("Median gain", "Gain médian")}</th></tr></thead><tbody>` +
+      ACTS.map(k => `<tr class="grp"><td colspan="2">${SL[k]}</td><td class="n">${full(BS[k].links)}</td><td></td><td class="n">${S[k].simulated ? pctg(BS[k].median_gain) : tr("not simulated", "non simulé")}</td></tr>` +
+        SIM.rows.filter(r => r.strategy === k).map(r => `<tr><td>${side(r.src_group, r.src, r.n_src)}</td><td class="kw">${where(r.host)}</td><td class="n">${r.links}</td><td>${side(r.dst_group, r.dst, r.n_dst)}</td><td class="n">${r.gain == null ? "" : `<span class="pill p-ok">${pctg(r.gain)}</span>`}</td></tr>`).join("")).join("") + "</tbody>";
+    document.getElementById("matread").innerHTML = tr(
+      `<b>How to read it.</b> Each block is one action, its first row gives the total links and the median gain of the action. Hub rows: the hub page gets a "Start here" block linking its best content. Same-topic rows: pages of a topic link the priority pages of the same topic in their first paragraphs. Named offer links are listed but not simulated. <b>Method.</b> Each action is simulated alone, with only its own links. Row gain = median ${T("simpr", "simulated PageRank")} gain of the row's receiving pages. Rank correlation with Oncrawl's Inrank: ${nf(SIM.rho, 2)}, so read the gains as orders of magnitude.`,
+      `<b>Comment le lire.</b> Chaque bloc est une action, sa première ligne donne le total de liens et le gain médian de l'action. Lignes pilier : la page pilier reçoit un bloc « Commencer ici » qui lie ses meilleurs contenus. Lignes même thématique : les pages d'une thématique lient les pages prioritaires de la même thématique dans leurs premiers paragraphes. Les liens d'offre nommés sont listés mais pas simulés. <b>Méthode.</b> Chaque action est simulée seule, avec ses seuls liens. Gain d'une ligne = gain de ${T("simpr", "PageRank simulé")} médian de ses pages receveuses. Corrélation de rang avec l'Inrank Oncrawl : ${nf(SIM.rho, 2)}, lisez donc les gains comme des ordres de grandeur.`);
+    const TOP = SIM.top;
+    Highcharts.chart("simchart", {
+      chart: {type: "bar"}, xAxis: {categories: TOP.map(t => esc(t.path.replace(/^\/([^/]+)\/(.+)\/$/, "$2"))), labels: {style: {fontSize: "11px"}}},
+      yAxis: {title: {text: tr("Simulated PageRank gain (%)", "Gain de PageRank simulé (%)")}}, legend: {enabled: false},
+      tooltip: {useHTML: true, formatter() { const t = TOP[this.point.index]; return tr(`<b>${esc(t.path)}</b><br>Gain: +${nf(t.gain)}%<br>Rank among crawled pages: ${t.rank_before} → <b>${t.rank_after}</b> (of ${SIM.crawled})<br>${t.links} links added`,
+        `<b>${esc(t.path)}</b><br>Gain : +${nf(t.gain)} %<br>Rang parmi les pages crawlées : ${t.rank_before} → <b>${t.rank_after}</b> (sur ${SIM.crawled})<br>${t.links} liens ajoutés`); }},
+      plotOptions: {series: {dataLabels: {enabled: true, formatter() { const t = TOP[this.point.index]; return `+${nf(t.gain)}%  ${t.rank_before} → ${t.rank_after}`; }, style: {fontSize: "11px", fontWeight: "500"}}}},
+      series: [{data: TOP.map(t => t.gain), color: "#2f6fed"}],
+    });
+    const tmplShare = D.all_links ? ((D.positions.header || 0) + (D.positions.footer || 0) + (D.positions.nav || 0)) / D.all_links * 100 : 0;
+    document.getElementById("simread").innerHTML = tr(
+      `<b>Before / after.</b> The label gives the gain and the page's rank among the ${full(SIM.crawled)} crawled pages before and after the ${SIM.proposals - (BS.product.links || 0)} simulated links. Gains are modest in absolute terms because header, nav and footer carry ${pct(tmplShare)} of all links, and PageRank is conserved: what the content gains, the rest of the site gives up (money pages: ${nf(SIM.money_change, 2)}%). Read rank jumps as "leaves the tail", not as a precise position. The real Inrank will come from the next crawl after the links are in place.`,
+      `<b>Avant / après.</b> L'étiquette donne le gain et le rang de la page parmi les ${full(SIM.crawled)} pages crawlées avant et après les ${SIM.proposals - (BS.product.links || 0)} liens simulés. Les gains sont modestes en valeur absolue car header, nav et footer portent ${pct(tmplShare)} de tous les liens, et le PageRank se conserve : ce que gagnent les contenus, le reste du site le cède (pages business : ${nf(SIM.money_change, 2)} %). Lisez les sauts de rang comme « sort de la queue », pas comme une position précise. L'Inrank réel viendra du prochain crawl, une fois les liens posés.`);
+  }
+
+  // ================= TAB 3 anchors =================
+  if (!AV.links) missing("ancmissing", "List A (anchors to fix) and the anchor-type chart need the link tables: run the audit from Claude Code to get them. List B is built from the page data.", "La liste A (ancres à corriger) et le graphique des types d'ancres ont besoin des tables de liens : lancez l'audit depuis Claude Code pour les obtenir. La liste B vient des données de pages.");
+  const FX = D.anchor_fixes, CONT = RS.content;
+  document.getElementById("akpis").innerHTML = [
+    [FX.filter(f => f.kind !== "descriptive").length, tr(`Existing links with a generic, URL, empty or title-copy anchor to fix first (list A; ${FX.length} with the descriptive ones)`, `Liens existants à ancre générique, URL, vide ou copie du title à corriger d'abord (liste A ; ${FX.length} avec les descriptives)`)],
+    [D.proposals.length, tr("Links to add, with their anchor (list B)", "Liens à ajouter, avec leur ancre (liste B)")],
+    [CONT.kw_pages ? pct(Math.round(CONT.kw_miss / CONT.kw_pages * 100)) : "–", tr(`Ranking content pages (${CONT.kw_pages}) with none of their Google queries in any inlink anchor, menus included`, `Contenus positionnés (${CONT.kw_pages}) sans aucune de leurs requêtes Google dans l'ancre d'un lien entrant, menus inclus`)],
+    [full(D.cta.links) + tr(" links", " liens"), tr('Generic CTA ("Learn more") towards money pages: one template change', "CTA génériques (« En savoir plus ») vers les pages business : un seul changement de gabarit")],
+  ].map(([v, d]) => `<div class="card kpi"><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
+  const KL = {query: tr("Matches a ranking query", "Reprend une requête positionnée"), descriptive: tr("Descriptive, no query", "Descriptive sans la requête"), generic: tr("Generic", "Générique"), url: "URL", empty: tr("Empty", "Vide"), title: tr("Title copy", "Copie du title")};
+  const KC = {query: "p-ok", descriptive: "p-acc", generic: "p-high", url: "p-med", empty: "p-low", title: "p-med"};
+  const FT = pager(document.getElementById("ftbl"), document.getElementById("fmore"), document.getElementById("fcount"),
+    () => { const q = document.getElementById("fq").value.toLowerCase(), p = document.getElementById("fp").value, k = document.getElementById("fk").value;
+      return FX.filter(f => (!p || f.prio === p) && (k === "all" || (k ? f.kind === k : f.kind !== "descriptive")) && (!q || f.origin.toLowerCase().includes(q) || f.target.toLowerCase().includes(q) || f.anchor.toLowerCase().includes(q))); },
+    f => `<tr><td><span class="pill ${PCLS[f.prio]}">${PL[f.prio]}</span></td><td><a href="${safeUrl(f.origin)}" target="_blank" rel="noopener">${sp(f.origin)}</a></td><td><a href="${safeUrl(f.target)}" target="_blank" rel="noopener">${sp(f.target)}</a><div class="kw">${gn(f.group)}</div></td>
+      <td>${f.anchor ? esc(f.anchor) : `<i>${tr("(empty)", "(vide)")}</i>`}${f.n > 1 ? ` <span class="kw">×${f.n}</span>` : ""}</td><td><span class="pill ${KC[f.kind]}">${KL[f.kind]}</span></td><td><b>${esc(f.suggested)}</b></td><td class="n">${fmt(f.sd)}</td></tr>`, 100, tr("links", "liens"));
+  ["fq", "fp", "fk"].forEach(id => document.getElementById(id).addEventListener("input", FT.reset));
+  FT.render();
+  document.getElementById("fcsv").onclick = () => csv("anchors_to_fix.csv", ["priority", "page_carrying_link", "target_page", "current_anchor", "anchor_type", "suggested_anchor", "links", "target_impressions_pos_4_20"], FX.map(f => [f.prio, f.origin, f.target, f.anchor, f.kind, f.suggested, f.n, f.sd]));
+  document.getElementById("fread").innerHTML = tr(
+    `<b>Order.</b> High-priority targets first; within a priority, generic, URL and empty anchors first, then anchors copying the title. The descriptive anchors that miss the target's query (${FX.filter(f => f.kind === "descriptive").length} links) are hidden by default: pick "All types" to see them. The suggested anchor is the target's first Google query (brand queries left out); adapt it to the sentence and vary it across links to the same page.`,
+    `<b>Ordre.</b> Les cibles en priorité haute d'abord ; à priorité égale, les ancres génériques, URL et vides d'abord, puis les ancres qui copient le title. Les ancres descriptives qui ratent la requête de la cible (${FX.filter(f => f.kind === "descriptive").length} liens) sont masquées par défaut : choisissez « Tous les types » pour les voir. L'ancre suggérée est la première requête Google de la cible (requêtes de marque écartées) : adaptez-la à la phrase et variez-la entre les liens vers une même page.`);
+  const PRP = D.proposals, psel = document.getElementById("ps"), pgs = document.getElementById("pgs");
+  Object.entries(SL).forEach(([k, v]) => psel.add(new Option(v, k)));
+  [...new Set(PRP.map(p => p.receiver_group))].forEach(g => pgs.add(new Option(g, g)));
+  const gainOf = Object.fromEntries(D.targets.map(r => [r.url, r.gain]));
+  const PT = pager(document.getElementById("ptbl"), document.getElementById("pmore"), document.getElementById("pcount"),
+    () => { const q = document.getElementById("pq").value.toLowerCase(); return PRP.filter(p => (!psel.value || p.strategy === psel.value) && (!pgs.value || p.receiver_group === pgs.value) && (!q || p.sender.toLowerCase().includes(q) || p.receiver.toLowerCase().includes(q))); },
+    p => `<tr><td>${SL[p.strategy]}</td><td><a href="${safeUrl(p.sender)}" target="_blank" rel="noopener">${sp(p.sender)}</a><div class="kw">${gn(p.sender_group)}</div></td>
+      <td class="kw">${p.host === "in-text" ? tr("In the text, first paragraphs", "Dans le texte, premiers paragraphes") : tr('"Start here" block of the hub', "Bloc « Commencer ici » de la page pilier")}</td>
+      <td><a href="${safeUrl(p.receiver)}" target="_blank" rel="noopener">${sp(p.receiver)}</a><div class="kw">${gn(p.receiver_group)}</div></td><td><b>${esc(p.anchor)}</b></td><td class="n">${p.simulated ? gainCell(gainOf[p.receiver] ?? 0) : `<span class="kw">${tr("not simulated", "non simulé")}</span>`}</td></tr>`, 100, tr("links", "liens"));
+  ["pq", "ps", "pgs"].forEach(id => document.getElementById(id).addEventListener("input", PT.reset));
+  PT.render();
+  document.getElementById("pcsv").onclick = () => csv("links_to_add.csv", ["strategy", "page_giving_link", "where", "page_receiving", "anchor", "simulated_gain_pct"], PRP.map(p => [p.strategy, p.sender, p.host, p.receiver, p.anchor, p.simulated ? gainOf[p.receiver] ?? "" : ""]));
+  document.getElementById("pread").innerHTML = tr(
+    `<b>How to use it.</b> Hub rows: the hub page gets a "Start here" block with up to 10 of its best content pages. Same-topic rows: one sentence in the first paragraphs of the giving page, with the anchor shown (one of the receiver's top 3 Google queries, rotated so the same page is not always linked with the same words). Named offer rows: add one in-text sentence naming the offer.${AV.graph ? "" : " Without the link graph, a proposed link may already exist: check the page before adding it."}`,
+    `<b>Mode d'emploi.</b> Lignes pilier : la page pilier reçoit un bloc « Commencer ici » avec jusqu'à 10 de ses meilleurs contenus. Lignes même thématique : une phrase dans les premiers paragraphes de la page donneuse, avec l'ancre indiquée (l'une des 3 premières requêtes Google du receveur, en alternance pour ne pas lier la même page toujours avec les mêmes mots). Lignes offre nommée : ajoutez une phrase dans le texte qui nomme l'offre.${AV.graph ? "" : " Sans le graphe de liens, un lien proposé peut déjà exister : vérifiez la page avant de l'ajouter."}`);
+  const KINDS = [["query", KL.query, "#16a34a"], ["descriptive", tr("Descriptive", "Descriptive"), "#2f6fed"], ["generic", KL.generic, "#dc2626"], ["url", "URL", "#d97706"], ["empty", KL.empty, "#94a3b8"]];
+  const AG = D.groups.filter(g => Object.values(g.anchors).reduce((s, n) => s + n, 0) >= 20);
+  if (AG.length) Highcharts.chart("akind", {
+    chart: {type: "bar"}, xAxis: {categories: AG.map(g => gn(g.name))}, yAxis: {max: 100, title: {text: tr("% of in-text links pointing to the group", "% des liens éditoriaux pointant vers le groupe")}},
+    plotOptions: {series: {stacking: "percent"}}, tooltip: {shared: true, pointFormat: `<span style="color:{series.color}">●</span> {series.name}${FR ? " :" : ":"} <b>{point.y}</b> ${tr("links", "liens")} ({point.percentage:.0f}${FR ? " %" : "%"})<br>`},
+    series: KINDS.map(([k, name, color]) => ({name, color, data: AG.map(g => g.anchors[k] || 0)})),
+  });
+  else document.getElementById("akind").outerHTML = `<p class="kw">${tr("Not enough in-text links to chart.", "Pas assez de liens éditoriaux pour un graphique.")}</p>`;
+
+  applyTips();
+  showTab();
+}
+
+// ---------- boot: embedded data (Claude Code) or the loader (hosted page) ----------
+function boot(text) {
+  const R = JSON.parse(text);
+  window.__RAW__ = R;
+  const M = buildModel(R);
+  document.getElementById("loader").hidden = true;
+  render(M);
+}
+(function () {
+  const embedded = document.getElementById("raw").textContent.trim();
+  const fail = e => { document.getElementById("loader").hidden = false; document.getElementById("rawerr").textContent = tr("Could not build the audit: ", "Impossible de construire l'audit : ") + e.message; console.error(e); };
+  if (embedded && embedded !== "null") { try { boot(embedded); } catch (e) { fail(e); } return; }
+  const saved = store.get();
+  if (saved) { try { boot(saved); return; } catch (e) { fail(e); } }
+  document.getElementById("loader").hidden = false;
+  const go = text => { try { boot(text); if (!store.set(text)) console.warn("raw.json too big for sessionStorage: switching language will ask for it again"); } catch (e) { fail(e); } };
+  document.getElementById("rawgo").onclick = () => go(document.getElementById("rawtxt").value);
+  document.getElementById("rawfile").onchange = e => { const f = e.target.files[0]; if (f) f.text().then(go); };
+})();
+</script>
+</body>
+</html>
